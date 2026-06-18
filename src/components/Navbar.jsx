@@ -11,9 +11,23 @@ const LOGO_URL =
 
 const REGIONS = [{ label: "Europe", currency: "€" }];
 
-export default function Navbar() {
+export default function Navbar({ transparentOnTop = false }) {
   const [regionOpen, setRegionOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    if (!transparentOnTop) return;
+
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 50);
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll();
+
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [transparentOnTop]);
 
   useEffect(() => {
     if (menuOpen) {
@@ -26,14 +40,19 @@ export default function Navbar() {
     };
   }, [menuOpen]);
 
+  const showTransparent = transparentOnTop && !isScrolled && !menuOpen;
+
   return (
     <div
       className={`sticky top-0 z-50 select-none transition-all duration-300 ${
         menuOpen
           ? "bg-transparent border-b border-transparent"
+          : showTransparent
+          ? "bg-transparent border-b border-transparent"
           : "bg-white border-b border-black/5"
       }`}
     >
+
       <header className="mx-auto grid h-[75px] max-w-full grid-cols-[1fr_auto_1fr] items-center px-6 relative z-50">
         <div className="flex items-center">
           <button
