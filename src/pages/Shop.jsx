@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import Hls from "hls.js";
 import Navbar from "../components/Navbar";
 import ProductCard from "../components/ProductCard";
@@ -29,6 +29,10 @@ export default function Shop() {
   const sortRef = useRef(null);
 
   const location = useLocation();
+  const navigate = useNavigate();
+
+  const searchParams = new URLSearchParams(location.search);
+  const searchQuery = searchParams.get("q") || "";
 
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [isSortOpen, setIsSortOpen] = useState(false);
@@ -234,6 +238,21 @@ export default function Shop() {
 
 
   const filteredProducts = products.filter(product => {
+
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase().trim();
+      const matchesSearch = 
+        (product.title || "").toLowerCase().includes(q) ||
+        (product.category || "").toLowerCase().includes(q) ||
+        (product.species || "").toLowerCase().includes(q) ||
+        (product.origin || "").toLowerCase().includes(q) ||
+        (product.taste || "").toLowerCase().includes(q) ||
+        (product.appearance || "").toLowerCase().includes(q);
+      
+      if (!matchesSearch) return false;
+    }
+
+
     const hasActiveFilters = 
       activeFilters["From the sea"].length > 0 ||
       activeFilters["From the land"].length > 0 ||
@@ -298,10 +317,10 @@ export default function Shop() {
 
   return (
     <div className="min-h-screen bg-white flex flex-col font-sans select-none">
-      <Navbar transparentOnTop={true} />
+      <Navbar />
 
       <main className="flex-grow flex flex-col pb-24">
-        <div className="relative w-full h-[60vh] md:h-[75vh] overflow-hidden -mt-[75px] bg-[#121212]">
+        <div className="relative w-full h-[60vh] md:h-[75vh] overflow-hidden bg-[#121212]">
           <video
             ref={videoRef}
             className="absolute top-0 left-0 w-full h-full object-cover opacity-90"
@@ -312,7 +331,7 @@ export default function Shop() {
           />
           <div className="absolute inset-0 bg-black/10 z-10"></div>
           <div className="absolute inset-0 flex items-center justify-center z-20 select-none pointer-events-none">
-            <h1 className="font-ivy text-[48px] sm:text-[68px] md:text-[84px] font-light text-white uppercase tracking-[4px] text-center mt-[75px]">
+            <h1 className="font-ivy text-[48px] sm:text-[68px] md:text-[84px] font-light text-white uppercase tracking-[4px] text-center">
               Our Shop
             </h1>
           </div>
@@ -389,6 +408,28 @@ export default function Shop() {
           </div>
         </div>
 
+        {searchQuery && (
+          <div className="max-w-7xl mx-auto w-full px-6 mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4 py-4 border-b border-black/5 animate-fade-in-down">
+            <div className="flex items-center gap-2">
+              <span className="font-assistant text-xs uppercase tracking-[2px] text-gh-dark/50">Search results for:</span>
+              <span className="font-sans text-sm font-semibold text-gh-dark">"{searchQuery}"</span>
+              <span className="font-assistant text-[11px] text-gh-dark/50 ml-1">({filteredProducts.length} items found)</span>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                navigate("/collections/all");
+              }}
+              className="self-start sm:self-auto font-sans text-xs text-gh-dark hover:text-gh-gold border border-black/15 hover:border-gh-gold/40 px-3.5 py-1.5 transition-colors duration-300 rounded-sm flex items-center gap-2"
+            >
+              <span>Clear Search</span>
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-3.5 h-3.5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        )}
+
         {loading ? (
           <SkeletonGrid />
         ) : error ? (
@@ -404,10 +445,22 @@ export default function Shop() {
           </div>
         ) : categories.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 px-6 text-center max-w-md mx-auto">
-            <p className="font-ivy text-lg text-gh-dark mb-4">No Caviar Available</p>
-            <p className="text-xs text-gh-dark/60">
-              We are currently selecting our next harvest. Please check back shortly.
+            <p className="font-ivy text-lg text-gh-dark mb-4">
+              {searchQuery ? "No Results Found" : "No Caviar Available"}
             </p>
+            <p className="text-xs text-gh-dark/60 mb-6">
+              {searchQuery 
+                ? `We couldn't find any products matching "${searchQuery}". Please try another search term.`
+                : "We are currently selecting our next harvest. Please check back shortly."}
+            </p>
+            {searchQuery && (
+              <button
+                onClick={() => navigate("/collections/all")}
+                className="bg-gh-dark text-white text-[11px] uppercase tracking-[2px] font-semibold px-6 py-2.5 hover:bg-gh-gold transition-colors duration-300 rounded-sm"
+              >
+                Clear Search & Show All
+              </button>
+            )}
           </div>
         ) : (
           <div className="w-full flex flex-col gap-16">
