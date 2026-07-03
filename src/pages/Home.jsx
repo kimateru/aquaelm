@@ -1,8 +1,9 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import HeroVideo from "../components/HeroVideo";
 import Footer from "../components/Footer";
+import BestSellersSlider from "../components/BestSellersSlider";
 import fishGraphic from "../assets/Fish_Graphic.webp";
 import { fetchProducts } from "../services/products";
 
@@ -12,10 +13,6 @@ export default function Home() {
   const [typedText, setTypedText] = useState("");
   const [startTyping, setStartTyping] = useState(false);
   const [bestSellers, setBestSellers] = useState([]);
-  const [scrollProgress, setScrollProgress] = useState(0);
-  const [activeSlide, setActiveSlide] = useState(0);
-  const sliderRef = useRef(null);
-  const dragState = useRef({ active: false, startX: 0, scrollLeft: 0, moved: false });
 
   const LA_PERLE_TEXT = "Pearls before wine.";
   const [typedLaPerle, setTypedLaPerle] = useState("");
@@ -115,105 +112,6 @@ export default function Home() {
     }
     loadBestSellers();
   }, []);
-
-  useEffect(() => {
-    if (bestSellers.length === 0) return;
-    const slider = sliderRef.current;
-    if (slider) slider.style.cursor = "grab";
-    const raf = requestAnimationFrame(() => syncActiveSlideFromScroll());
-    return () => cancelAnimationFrame(raf);
-  }, [bestSellers]);
-
-  const getSlideScrollPosition = (slideEl) => {
-    const slider = sliderRef.current;
-    if (!slider || !slideEl) return 0;
-    return slideEl.getBoundingClientRect().left - slider.getBoundingClientRect().left + slider.scrollLeft;
-  };
-
-  const syncActiveSlideFromScroll = () => {
-    const slider = sliderRef.current;
-    const slides = slider?.querySelectorAll("[data-slide]");
-    if (!slider || !slides?.length) return;
-
-    const maxScroll = slider.scrollWidth - slider.clientWidth;
-    if (maxScroll <= 0) {
-      setScrollProgress(0);
-      setActiveSlide(0);
-      return;
-    }
-
-    setScrollProgress(slider.scrollLeft / maxScroll);
-
-    let closestIndex = 0;
-    let closestDistance = Infinity;
-    slides.forEach((slide, index) => {
-      const distance = Math.abs(getSlideScrollPosition(slide) - slider.scrollLeft);
-      if (distance < closestDistance) {
-        closestDistance = distance;
-        closestIndex = index;
-      }
-    });
-    setActiveSlide(closestIndex);
-  };
-
-  const handleScroll = () => {
-    syncActiveSlideFromScroll();
-  };
-
-  const scrollToSlide = (index) => {
-    const slider = sliderRef.current;
-    const slides = slider?.querySelectorAll("[data-slide]");
-    if (!slider || !slides?.length) return;
-
-    const clamped = Math.max(0, Math.min(index, slides.length - 1));
-    const targetLeft = getSlideScrollPosition(slides[clamped]);
-    slider.scrollTo({ left: targetLeft, behavior: "smooth" });
-    setActiveSlide(clamped);
-  };
-
-  const scrollLeft = () => scrollToSlide(activeSlide - 1);
-  const scrollRight = () => scrollToSlide(activeSlide + 1);
-
-  const handleSliderPointerDown = (e) => {
-    if (e.button !== 0) return;
-    const slider = sliderRef.current;
-    if (!slider) return;
-
-    dragState.current = {
-      active: true,
-      startX: e.clientX,
-      scrollLeft: slider.scrollLeft,
-      moved: false,
-    };
-    slider.setPointerCapture(e.pointerId);
-    slider.style.scrollSnapType = "none";
-    slider.style.cursor = "grabbing";
-  };
-
-  const handleSliderPointerMove = (e) => {
-    const slider = sliderRef.current;
-    if (!slider || !dragState.current.active) return;
-
-    e.preventDefault();
-    const walk = e.clientX - dragState.current.startX;
-    if (Math.abs(walk) > 6) dragState.current.moved = true;
-    slider.scrollLeft = dragState.current.scrollLeft - walk;
-  };
-
-  const handleSliderPointerUp = (e) => {
-    const slider = sliderRef.current;
-    if (!slider || !dragState.current.active) return;
-
-    dragState.current.active = false;
-    slider.releasePointerCapture(e.pointerId);
-    slider.style.scrollSnapType = "";
-    slider.style.cursor = "grab";
-    syncActiveSlideFromScroll();
-
-    window.setTimeout(() => {
-      dragState.current.moved = false;
-    }, 80);
-  };
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -376,81 +274,7 @@ export default function Home() {
             Best Sellers
           </h2>
 
-          <div className="relative w-full group">
-            <button
-              type="button"
-              onClick={scrollLeft}
-              className="absolute left-3 md:left-5 top-[40%] -translate-y-1/2 bg-black/[0.02] hover:bg-black/[0.06] text-[#121212]/70 h-16 w-10 z-20 flex items-center justify-center transition-colors cursor-pointer"
-              aria-label="Scroll left"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.2} stroke="currentColor" className="w-6 h-6">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-              </svg>
-            </button>
-
-            <button
-              type="button"
-              onClick={scrollRight}
-              className="absolute right-3 md:right-5 top-[40%] -translate-y-1/2 bg-black/[0.02] hover:bg-black/[0.06] text-[#121212]/70 h-16 w-10 z-20 flex items-center justify-center transition-colors cursor-pointer"
-              aria-label="Scroll right"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.2} stroke="currentColor" className="w-6 h-6">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-              </svg>
-            </button>
-
-            <div
-              ref={sliderRef}
-              onScroll={handleScroll}
-              onPointerDown={handleSliderPointerDown}
-              onPointerMove={handleSliderPointerMove}
-              onPointerUp={handleSliderPointerUp}
-              onPointerCancel={handleSliderPointerUp}
-              className="relative flex overflow-x-auto gap-4 md:gap-5 scrollbar-none scroll-smooth pb-4 px-3 md:px-5 snap-x snap-mandatory touch-pan-x"
-              style={{ scrollbarWidth: "none", msOverflowStyle: "none", WebkitOverflowScrolling: "touch" }}
-            >
-              {bestSellers.map((product) => {
-                const primaryImage = product.images?.[0] || "https://images.unsplash.com/photo-1544025162-d76694265947?q=80&w=800";
-                return (
-                  <div
-                    key={product.id}
-                    data-slide
-                    className="snap-start shrink-0 w-[calc(100vw-2.5rem)] sm:w-[calc(50vw-1.75rem)] md:w-[calc(34vw-1.25rem)] lg:w-[calc(33.333vw-1rem)] flex flex-col items-center text-center"
-                  >
-                    <Link
-                      to={`/products/${product.id}`}
-                      draggable={false}
-                      onClick={(e) => {
-                        if (dragState.current.moved) e.preventDefault();
-                      }}
-                      className="flex flex-col items-center text-center group outline-none w-full"
-                    >
-                      <div className="aspect-square w-full overflow-hidden bg-transparent mb-5 relative">
-                        <img
-                          src={primaryImage}
-                          alt={product.title}
-                          className="w-full h-full object-cover transition-transform duration-[800ms] ease-in-out group-hover:scale-105 pointer-events-none"
-                        />
-                      </div>
-                      <h3 className="font-assistant text-[13px] font-semibold uppercase tracking-[3px] text-[#121212] leading-none mb-1">
-                        {product.title}
-                      </h3>
-                    </Link>
-                  </div>
-                );
-              })}
-            </div>
-
-            <div className="w-64 h-[2px] bg-black/10 relative mt-12 mx-auto overflow-hidden">
-              <div
-                className="absolute top-0 bottom-0 left-0 bg-gh-gold transition-transform duration-150"
-                style={{
-                  width: "40%",
-                  transform: `translateX(${scrollProgress * 150}%)`,
-                }}
-              />
-            </div>
-          </div>
+          <BestSellersSlider products={bestSellers} />
         </div>
 
 

@@ -61,6 +61,19 @@
     line-height: 0.9;
     letter-spacing: 0;
   }
+
+  .best-sellers-swiper {
+    overflow: hidden;
+  }
+
+  .best-sellers-swiper .swiper-wrapper {
+    align-items: stretch;
+  }
+
+  .best-sellers-nav.swiper-button-disabled {
+    opacity: 0.35;
+    pointer-events: none;
+  }
 }
 
 @layer utilities {
