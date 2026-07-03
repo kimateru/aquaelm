@@ -4,14 +4,20 @@ export default {
   theme: {
     extend: {
       colors: {
-        'gh-gold': '#c5a059',
-        'gh-brown': '#8c6c30',
+        'aquaelm-blue': '#002D72',
+        'aquaelm-blue-light': '#0047AB',
+        'aquaelm-accent': '#7EB8FF',
+        'aquaelm-accent-soft': '#5C9FE8',
+        'gh-gold': '#002D72',
+        'gh-brown': '#002D72',
         'gh-dark': '#121212',
         'gh-sand': '#f9f6f0',
       },
       fontFamily: {
-        ivy: ['"IvyPresto Display"', 'Playfair Display', 'Georgia', 'serif'],
-        assistant: ['Assistant', 'sans-serif'],
+        sans: ['"El Messiri"', 'serif'],
+        ivy: ['"El Messiri"', 'serif'],
+        assistant: ['"El Messiri"', 'serif'],
+        helvetica: ['"El Messiri"', 'serif'],
       },
       keyframes: {
         'scroll-down': {

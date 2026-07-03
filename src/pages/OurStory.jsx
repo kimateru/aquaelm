@@ -5,13 +5,13 @@ import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import fishGraphic from "../assets/Fish_Graphic.webp";
 
-const STORY_TEXT = "Yes, it's excessive. That's the point. For more than 50\nyears, Gourmet House has left the people who want\nfor nothing wanting more.";
+const STORY_TEXT = "Yes, it's excessive. That's the point. For more than 50\nyears, Aquaelm has left the people who want\nfor nothing wanting more.";
 
 const QUALITY_TEXT = "Uncompromising\nquality, with\nuncompromising\nsustainability.";
 
 const PARTNERS_TEXT = "Your most\nwell-fed friend\nmay not know us\nby name. But his\nchef does.";
 
-const PARTNERS_DESCRIPTION = "Around the world, discerning palates demand Gourmet House. As a direct supplier, we collaborate with world-class restaurants, luxury hospitality brands, and global travel partners who seek to create experiences of unparalleled excellence. Their experts trust our experts. From breeding and harvesting to curing and packaging, they know every detail is carefully considered with their clients in mind.";
+const PARTNERS_DESCRIPTION = "Around the world, discerning palates demand Aquaelm. As a direct supplier, we collaborate with world-class restaurants, luxury hospitality brands, and global travel partners who seek to create experiences of unparalleled excellence. Their experts trust our experts. From breeding and harvesting to curing and packaging, they know every detail is carefully considered with their clients in mind.";
 
 const SUSTAINABILITY_TEXT = "Caviar, without\ncompromise or\nacceleration";
 
@@ -190,7 +190,7 @@ export default function OurStory() {
       <Navbar />
       <main className="flex-grow flex flex-col">
         
-        <div className="relative w-full h-[60vh] md:h-[75vh] overflow-hidden bg-[#121212]">
+        <div className="relative w-full section-viewport overflow-hidden bg-[#121212]">
           <video
             ref={videoRef}
             className="absolute top-0 left-0 w-full h-full object-cover opacity-95"
@@ -209,7 +209,7 @@ export default function OurStory() {
 
         <div
           id="story-statement-section"
-          className="relative py-28 px-6 md:px-12 flex flex-col items-center text-center bg-white overflow-hidden min-h-[500px] justify-center"
+          className="relative section-viewport py-28 px-6 md:px-12 flex flex-col items-center text-center bg-white overflow-hidden justify-center"
         >
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
             <img
@@ -252,7 +252,7 @@ export default function OurStory() {
 
         <div
           id="story-quality-section"
-          className="relative w-full h-[450px] sm:h-[500px] md:h-[600px] flex items-center overflow-hidden bg-[#f4f4f4] border-t border-black/5"
+          className="relative w-full section-viewport flex items-center overflow-hidden bg-[#f4f4f4] border-t border-black/5"
         >
           <div className="absolute inset-0 z-0 select-none pointer-events-none">
             <img
@@ -278,7 +278,7 @@ export default function OurStory() {
 
         <div
           id="story-partners-section"
-          className="relative w-full h-[550px] sm:h-[600px] md:h-[680px] flex items-center overflow-hidden bg-[#f4f4f4] border-t border-black/5"
+          className="relative w-full section-viewport flex items-center overflow-hidden bg-[#f4f4f4] border-t border-black/5"
         >
           <div className="absolute inset-0 z-0 select-none pointer-events-none">
             <img
@@ -290,7 +290,7 @@ export default function OurStory() {
 
           <div className="relative z-10 max-w-7xl mx-auto px-6 md:px-12 lg:px-20 w-full h-full flex items-center justify-start">
             <div className="max-w-[85%] sm:max-w-[65%] md:max-w-2xl flex flex-col items-start text-left gap-4 md:gap-5">
-              <h6 className="font-assistant text-[11px] md:text-[12px] font-semibold uppercase tracking-[0.25em] text-[#c5a059]">
+              <h6 className="font-assistant text-[11px] md:text-[12px] font-semibold uppercase tracking-[0.25em] text-gh-gold">
                 OUR PARTNERS
               </h6>
 
@@ -312,7 +312,7 @@ export default function OurStory() {
 
         <div
           id="story-sustainability-section"
-          className="relative w-full h-[550px] sm:h-[600px] md:h-[680px] flex items-center overflow-hidden bg-[#f4f4f4] border-t border-black/5"
+          className="relative w-full section-viewport flex items-center overflow-hidden bg-[#f4f4f4] border-t border-black/5"
         >
           <div className="absolute inset-0 z-0 select-none pointer-events-none">
             <img
@@ -324,7 +324,7 @@ export default function OurStory() {
 
           <div className="relative z-10 max-w-7xl mx-auto px-6 md:px-12 lg:px-20 w-full h-full flex items-center justify-end">
             <div className="max-w-[85%] sm:max-w-[65%] md:max-w-2xl flex flex-col items-start text-left gap-4 md:gap-5">
-              <h6 className="font-assistant text-[11px] md:text-[12px] font-semibold uppercase tracking-[0.25em] text-[#c5a059]">
+              <h6 className="font-assistant text-[11px] md:text-[12px] font-semibold uppercase tracking-[0.25em] text-gh-gold">
                 SLOW BY DESIGN
               </h6>
 

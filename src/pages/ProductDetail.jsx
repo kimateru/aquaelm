@@ -3,7 +3,11 @@ import { useParams, Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { fetchProductById } from "../services/products";
-import { useCart } from "../context/CartContext";
+import {
+  ORDER_PHONE,
+  ORDER_PHONE_DISPLAY,
+  buildProductInquiryMailtoFromForm,
+} from "../constants/contact";
 
 export default function ProductDetail() {
   const { id } = useParams();
@@ -12,9 +16,13 @@ export default function ProductDetail() {
   const [error, setError] = useState(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [selectedVariant, setSelectedVariant] = useState(null);
-  const [quantity, setQuantity] = useState(1);
   const [isDeliveryOpen, setIsDeliveryOpen] = useState(false);
-  const { addToCart } = useCart();
+  const [inquiryForm, setInquiryForm] = useState({
+    name: "",
+    phone: "",
+    email: "",
+    country: "",
+  });
 
   useEffect(() => {
     async function loadProduct() {
@@ -40,28 +48,23 @@ export default function ProductDetail() {
 
   const handlePrevImage = () => {
     if (!product || !product.images || product.images.length === 0) return;
-    setCurrentImageIndex((prev) => 
+    setCurrentImageIndex((prev) =>
       prev === 0 ? product.images.length - 1 : prev - 1
     );
   };
 
   const handleNextImage = () => {
     if (!product || !product.images || product.images.length === 0) return;
-    setCurrentImageIndex((prev) => 
+    setCurrentImageIndex((prev) =>
       prev === product.images.length - 1 ? 0 : prev + 1
     );
-  };
-
-  const handleAddToCart = () => {
-    if (!product || !selectedVariant) return;
-    addToCart(product, selectedVariant, quantity);
   };
 
   if (loading) {
     return (
       <div className="min-h-screen bg-white flex flex-col font-sans select-none">
         <Navbar />
-        <main className="flex-grow flex items-center justify-center py-24">
+        <main className="flex-grow section-viewport flex items-center justify-center">
           <div className="flex flex-col items-center gap-4">
             <div className="w-10 h-10 border-2 border-gh-gold border-t-transparent rounded-full animate-spin"></div>
             <p className="font-assistant text-xs uppercase tracking-[2px] text-[#121212]/60">Loading Details...</p>
@@ -76,12 +79,12 @@ export default function ProductDetail() {
     return (
       <div className="min-h-screen bg-white flex flex-col font-sans select-none">
         <Navbar />
-        <main className="flex-grow flex flex-col items-center justify-center py-24 px-6 text-center max-w-md mx-auto">
+        <main className="flex-grow section-viewport flex flex-col items-center justify-center px-6 text-center max-w-md mx-auto">
           <p className="text-red-500 font-semibold mb-2">Error Loading Product</p>
           <p className="text-xs text-gh-dark/60 mb-6">{error || "Product not found."}</p>
           <Link
             to="/collections/all"
-            className="bg-gh-dark text-white text-[11px] uppercase tracking-[2px] font-semibold px-6 py-2.5 hover:bg-gh-gold transition-colors duration-300 rounded-sm"
+            className="bg-gh-gold text-white text-[11px] uppercase tracking-[2px] font-semibold px-6 py-2.5 hover:bg-aquaelm-blue-light transition-colors duration-300 rounded-sm"
           >
             Back to Shop
           </Link>
@@ -101,19 +104,36 @@ export default function ProductDetail() {
     taste,
     texture,
     images = [],
-    product_variants = []
+    product_variants = [],
   } = product;
 
   const currentImage = images[currentImageIndex] || "https://images.unsplash.com/photo-1544025162-d76694265947?q=80&w=800";
   const categoryLabel = category && category.toLowerCase().includes("sea") ? "CAVIAR" : (category ? category.toUpperCase() : "CAVIAR");
   const currentPrice = selectedVariant ? selectedVariant.price : 0;
-  const totalPriceFormatted = `€${(currentPrice * quantity).toFixed(2).replace(".", ",")}`;
+  const priceFormatted = `€${currentPrice.toFixed(2).replace(".", ",")}`;
+  const variantLabel = selectedVariant ? selectedVariant.weight : "";
+
+  const handleInquiryChange = (field) => (e) => {
+    setInquiryForm((prev) => ({ ...prev, [field]: e.target.value }));
+  };
+
+  const handleInquirySubmit = (e) => {
+    e.preventDefault();
+    window.location.href = buildProductInquiryMailtoFromForm({
+      ...inquiryForm,
+      productTitle: title,
+      variantLabel,
+    });
+  };
+
+  const inquiryInputClass =
+    "w-full border-b border-black/10 bg-transparent py-2.5 font-assistant text-sm text-[#121212] outline-none focus:border-gh-gold transition-colors placeholder:text-[#121212]/40";
 
   return (
     <div className="min-h-screen bg-white flex flex-col font-sans select-none">
       <Navbar />
 
-      <main className="flex-grow flex flex-col pb-24">
+      <main className="flex-grow section-viewport flex flex-col justify-center pb-24">
         <div className="max-w-7xl mx-auto w-full px-6 md:px-12 py-12 md:py-20">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-16 items-start">
             <div className="relative w-full aspect-square bg-[#f9f6f0] overflow-hidden group">
@@ -131,19 +151,8 @@ export default function ProductDetail() {
                     className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-black w-10 h-10 flex items-center justify-center cursor-pointer shadow-md transition-colors z-10 opacity-0 group-hover:opacity-100 duration-300"
                     aria-label="Previous image"
                   >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      strokeWidth={1.5}
-                      stroke="currentColor"
-                      className="w-5 h-5"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M15.75 19.5L8.25 12l7.5-7.5"
-                      />
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
                     </svg>
                   </button>
 
@@ -153,19 +162,8 @@ export default function ProductDetail() {
                     className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-black w-10 h-10 flex items-center justify-center cursor-pointer shadow-md transition-colors z-10 opacity-0 group-hover:opacity-100 duration-300"
                     aria-label="Next image"
                   >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      strokeWidth={1.5}
-                      stroke="currentColor"
-                      className="w-5 h-5"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M8.25 4.5l7.5 7.5-7.5 7.5"
-                      />
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
                     </svg>
                   </button>
                 </>
@@ -173,7 +171,7 @@ export default function ProductDetail() {
             </div>
 
             <div className="flex flex-col items-start pt-2">
-              <h6 className="font-assistant text-[11px] md:text-[12px] font-semibold uppercase tracking-[0.25em] text-[#c5a059] mb-2 leading-none">
+              <h6 className="font-assistant text-[11px] md:text-[12px] font-semibold uppercase tracking-[0.25em] text-gh-gold mb-2 leading-none">
                 {categoryLabel}
               </h6>
 
@@ -191,76 +189,42 @@ export default function ProductDetail() {
                 {texture && <p>{texture}</p>}
               </div>
 
-              <div className="flex items-center gap-8 mb-7 w-full max-w-sm">
-                {product_variants.length > 0 && (
-                  <div className="relative border-b border-black/10 pb-2 w-48">
-                    <select
-                      value={selectedVariant ? selectedVariant.id : ""}
-                      onChange={(e) => {
-                        const variant = product_variants.find(
-                          (v) => v.id === e.target.value,
-                        );
-                        setSelectedVariant(variant);
-                      }}
-                      className="w-full bg-transparent font-assistant text-sm font-light text-[#121212] pr-6 outline-none appearance-none cursor-pointer"
-                    >
-                      {product_variants.map((v) => (
-                        <option key={v.id} value={v.id}>
-                          {v.weight}
-                        </option>
-                      ))}
-                    </select>
-                    <div className="absolute right-0 top-1/2 -translate-y-1/2 pointer-events-none text-[#121212]/60">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        strokeWidth={1.5}
-                        stroke="currentColor"
-                        className="w-3.5 h-3.5"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M19.5 8.25l-7.5 7.5-7.5-7.5"
-                        />
-                      </svg>
-                    </div>
+              {product_variants.length > 0 && (
+                <div className="relative border-b border-black/10 pb-2 w-48 mb-7">
+                  <select
+                    value={selectedVariant ? selectedVariant.id : ""}
+                    onChange={(e) => {
+                      const variant = product_variants.find(
+                        (v) => v.id === e.target.value,
+                      );
+                      setSelectedVariant(variant);
+                    }}
+                    className="w-full bg-transparent font-assistant text-sm font-light text-[#121212] pr-6 outline-none appearance-none cursor-pointer"
+                  >
+                    {product_variants.map((v) => (
+                      <option key={v.id} value={v.id}>
+                        {v.weight}
+                      </option>
+                    ))}
+                  </select>
+                  <div className="absolute right-0 top-1/2 -translate-y-1/2 pointer-events-none text-[#121212]/60">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-3.5 h-3.5">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                    </svg>
                   </div>
-                )}
-
-                <div className="flex items-center gap-4 text-xs font-assistant font-light text-[#121212]/70">
-                  <button
-                    type="button"
-                    onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                    className="p-1 hover:text-black transition-colors font-semibold"
-                  >
-                    &minus;
-                  </button>
-                  <span className="w-4 text-center font-medium text-black">
-                    {quantity}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => setQuantity((q) => q + 1)}
-                    className="p-1 hover:text-black transition-colors font-semibold"
-                  >
-                    &#43;
-                  </button>
                 </div>
-              </div>
+              )}
 
               <span className="font-sans text-[16px] font-bold text-[#121212] mb-6">
-                {totalPriceFormatted}
+                {priceFormatted}
               </span>
 
-              <button
-                type="button"
-                onClick={handleAddToCart}
-                className="w-full max-w-md bg-[#121212] text-white font-assistant text-[11px] font-semibold uppercase tracking-[3px] py-4 text-center hover:bg-[#c5a059] transition-colors duration-300 flex items-center justify-center gap-1.5 cursor-pointer mb-7"
+              <a
+                href={`tel:${ORDER_PHONE}`}
+                className="w-full max-w-md bg-gh-gold text-white font-assistant text-[11px] font-semibold uppercase tracking-[3px] py-4 text-center hover:bg-aquaelm-blue-light transition-colors duration-300 flex items-center justify-center gap-1.5 cursor-pointer mb-7"
               >
-                PLACE IN CART &gt;
-              </button>
+                CALL TO ORDER &gt;
+              </a>
 
               <div className="w-full max-w-md border-b border-black/10 pb-4">
                 <button
@@ -269,19 +233,8 @@ export default function ProductDetail() {
                   className="w-full flex items-center justify-between font-assistant text-[11px] font-semibold uppercase tracking-[1.5px] text-[#121212] py-2 hover:opacity-75 transition-opacity"
                 >
                   <span>Delivery & Returns</span>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth={1.5}
-                    stroke="currentColor"
-                    className={`w-3.5 h-3.5 transition-transform duration-200 ${isDeliveryOpen ? "rotate-180" : ""}`}
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M19.5 8.25l-7.5 7.5-7.5-7.5"
-                    />
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={`w-3.5 h-3.5 transition-transform duration-200 ${isDeliveryOpen ? "rotate-180" : ""}`}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
                   </svg>
                 </button>
                 {isDeliveryOpen && (
@@ -303,6 +256,95 @@ export default function ProductDetail() {
                 )}
               </div>
             </div>
+          </div>
+
+          <div className="mt-16 md:mt-20 pt-10 md:pt-12 border-t border-black/10 w-full">
+            <h2 className="font-assistant text-[11px] font-semibold uppercase tracking-[2px] text-gh-gold mb-2">
+              Email Inquiry
+            </h2>
+            <p className="font-assistant text-[13px] text-[#121212]/70 font-light leading-relaxed mb-8 max-w-2xl">
+              Send us a message about this product and our team will respond with availability and details.
+            </p>
+
+            <form onSubmit={handleInquirySubmit} className="w-full">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-6">
+                <label className="flex flex-col gap-1.5">
+                  <span className="font-assistant text-[11px] font-semibold uppercase tracking-[1.5px] text-[#121212]/60">
+                    Name
+                  </span>
+                  <input
+                    type="text"
+                    name="name"
+                    value={inquiryForm.name}
+                    onChange={handleInquiryChange("name")}
+                    required
+                    autoComplete="name"
+                    className={inquiryInputClass}
+                    placeholder="Your name"
+                  />
+                </label>
+
+                <label className="flex flex-col gap-1.5">
+                  <span className="font-assistant text-[11px] font-semibold uppercase tracking-[1.5px] text-[#121212]/60">
+                    Phone Number
+                  </span>
+                  <input
+                    type="tel"
+                    name="phone"
+                    value={inquiryForm.phone}
+                    onChange={handleInquiryChange("phone")}
+                    required
+                    autoComplete="tel"
+                    className={inquiryInputClass}
+                    placeholder="Your phone number"
+                  />
+                </label>
+
+                <label className="flex flex-col gap-1.5">
+                  <span className="font-assistant text-[11px] font-semibold uppercase tracking-[1.5px] text-[#121212]/60">
+                    Email
+                  </span>
+                  <input
+                    type="email"
+                    name="email"
+                    value={inquiryForm.email}
+                    onChange={handleInquiryChange("email")}
+                    required
+                    autoComplete="email"
+                    className={inquiryInputClass}
+                    placeholder="Your email"
+                  />
+                </label>
+
+                <label className="flex flex-col gap-1.5">
+                  <span className="font-assistant text-[11px] font-semibold uppercase tracking-[1.5px] text-[#121212]/60">
+                    Country
+                  </span>
+                  <input
+                    type="text"
+                    name="country"
+                    value={inquiryForm.country}
+                    onChange={handleInquiryChange("country")}
+                    required
+                    autoComplete="country-name"
+                    className={inquiryInputClass}
+                    placeholder="Your country"
+                  />
+                </label>
+              </div>
+
+              <div className="mt-8 flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-8">
+                <button
+                  type="submit"
+                  className="bg-gh-gold text-white font-assistant text-[11px] font-semibold uppercase tracking-[3px] px-8 py-4 hover:bg-aquaelm-blue-light transition-colors duration-300"
+                >
+                  Send Inquiry &gt;
+                </button>
+                <p className="font-assistant text-[11px] text-[#121212]/50 font-light">
+                  Or call {ORDER_PHONE_DISPLAY}
+                </p>
+              </div>
+            </form>
           </div>
         </div>
       </main>

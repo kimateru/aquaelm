@@ -27,7 +27,7 @@ export default function HeroVideo() {
   }, []);
 
   return (
-    <div className="relative w-full h-[calc(100vh-75px)] overflow-hidden">
+    <div className="relative w-full section-viewport overflow-hidden">
       <video
         ref={videoRef}
         className="absolute top-0 left-0 w-full h-full object-cover"

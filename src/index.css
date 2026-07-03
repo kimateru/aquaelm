@@ -1,32 +1,67 @@
-@import url('https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap');
-
-@font-face {
-  font-family: 'IvyPresto Display';
-  src: url('https://gourmethouse.com/cdn/shop/t/2/assets/IvyPrestoDisplay-Thin.woff2') format('woff2');
-  font-weight: 300;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'IvyPresto Display';
-  src: url('https://gourmethouse.com/cdn/shop/t/2/assets/IvyPrestoDisplay-Thin.woff2') format('woff2');
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'IvyPresto Display';
-  src: url('https://gourmethouse.com/cdn/shop/t/2/assets/IvyPrestoDisplay-Thin.woff2') format('woff2');
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-}
+@import url('https://fonts.googleapis.com/css2?family=El+Messiri:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  :root {
+    --aquaelm-blue: #002D72;
+    --aquaelm-blue-light: #0047AB;
+    --aquaelm-accent: #7EB8FF;
+    --aquaelm-accent-soft: #5C9FE8;
+    --site-gutter-x: 2.5rem;
+  }
+
+  body {
+    font-family: 'El Messiri', serif;
+    font-weight: 400;
+  }
+}
+
+@layer components {
+  .brand-surface {
+    background-color: var(--aquaelm-blue);
+  }
+
+  .nav-action-btn {
+    @apply rounded-sm py-1.5 text-white transition-all duration-300;
+  }
+
+  .nav-action-btn:hover {
+    background-color: rgb(255 255 255 / 0.14);
+    color: var(--aquaelm-accent);
+  }
+
+  .footer-link {
+    @apply text-white/75 transition-colors duration-300 text-[15px] md:text-[16px];
+  }
+
+  .footer-link:hover {
+    color: var(--aquaelm-accent);
+  }
+
+  .footer-heading {
+    @apply font-assistant text-[13px] md:text-[14px] font-semibold uppercase tracking-[3px];
+    color: var(--aquaelm-accent);
+  }
+
+  .section-viewport {
+    min-height: 100vh;
+  }
+
+  .site-gutter {
+    @apply mx-auto max-w-full w-full;
+    padding-left: var(--site-gutter-x);
+    padding-right: var(--site-gutter-x);
+  }
+
+  .footer-wordmark {
+    @apply font-sans font-bold text-white uppercase block whitespace-nowrap;
+    line-height: 0.9;
+    letter-spacing: 0;
+  }
+}
 
 @layer utilities {
   .scrollbar-none::-webkit-scrollbar {

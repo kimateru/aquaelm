@@ -320,7 +320,7 @@ export default function Shop() {
       <Navbar />
 
       <main className="flex-grow flex flex-col pb-24">
-        <div className="relative w-full h-[60vh] md:h-[75vh] overflow-hidden bg-[#121212]">
+        <div className="relative w-full section-viewport overflow-hidden bg-[#121212]">
           <video
             ref={videoRef}
             className="absolute top-0 left-0 w-full h-full object-cover opacity-90"
@@ -433,18 +433,18 @@ export default function Shop() {
         {loading ? (
           <SkeletonGrid />
         ) : error ? (
-          <div className="flex flex-col items-center justify-center py-20 px-6 text-center max-w-md mx-auto">
+          <div className="flex flex-col items-center justify-center section-viewport py-20 px-6 text-center max-w-md mx-auto">
             <p className="text-red-500 font-semibold mb-2">Error Loading Products</p>
             <p className="text-xs text-gh-dark/60 mb-6">{error}</p>
             <button
               onClick={() => window.location.reload()}
-              className="bg-gh-dark text-white text-[11px] uppercase tracking-[2px] font-semibold px-6 py-2.5 hover:bg-gh-gold transition-colors duration-300 rounded-sm"
+              className="bg-gh-gold text-white text-[11px] uppercase tracking-[2px] font-semibold px-6 py-2.5 hover:bg-aquaelm-blue-light transition-colors duration-300 rounded-sm"
             >
               Try Again
             </button>
           </div>
         ) : categories.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20 px-6 text-center max-w-md mx-auto">
+          <div className="flex flex-col items-center justify-center section-viewport py-20 px-6 text-center max-w-md mx-auto">
             <p className="font-ivy text-lg text-gh-dark mb-4">
               {searchQuery ? "No Results Found" : "No Caviar Available"}
             </p>
@@ -456,7 +456,7 @@ export default function Shop() {
             {searchQuery && (
               <button
                 onClick={() => navigate("/collections/all")}
-                className="bg-gh-dark text-white text-[11px] uppercase tracking-[2px] font-semibold px-6 py-2.5 hover:bg-gh-gold transition-colors duration-300 rounded-sm"
+                className="bg-gh-gold text-white text-[11px] uppercase tracking-[2px] font-semibold px-6 py-2.5 hover:bg-aquaelm-blue-light transition-colors duration-300 rounded-sm"
               >
                 Clear Search & Show All
               </button>
@@ -465,7 +465,7 @@ export default function Shop() {
         ) : (
           <div className="w-full flex flex-col gap-16">
             {categories.map((category) => (
-              <div key={category} className="w-full">
+              <div key={category} className="w-full section-viewport flex flex-col justify-center py-16">
                 <h2 className="font-ivy text-[34px] sm:text-[44px] md:text-[50px] text-gh-dark text-center font-light mb-10 md:mb-12 tracking-wide uppercase">
                   {formatCategoryTitle(category)}
                 </h2>
@@ -571,7 +571,7 @@ export default function Shop() {
                           />
                           <span className={`w-[18px] h-[18px] border flex items-center justify-center transition-all ${
                             isChecked 
-                              ? 'bg-gh-dark border-gh-dark' 
+                              ? 'bg-gh-gold border-gh-gold' 
                               : 'bg-white border-black/20 group-hover:border-black/50'
                           }`}>
                             {isChecked && (
@@ -618,7 +618,7 @@ export default function Shop() {
               setActiveFilters({ ...stagedFilters });
               setIsFilterOpen(false);
             }}
-            className="bg-[#121212] text-white text-[11px] font-semibold uppercase tracking-[2px] px-8 py-3.5 hover:bg-gh-gold transition-colors duration-300 flex items-center gap-2"
+            className="bg-gh-gold text-white text-[11px] font-semibold uppercase tracking-[2px] px-8 py-3.5 hover:bg-aquaelm-blue-light transition-colors duration-300 flex items-center gap-2"
           >
             Apply
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-2.5 h-2.5 text-white">

@@ -13,7 +13,9 @@ export default function Home() {
   const [startTyping, setStartTyping] = useState(false);
   const [bestSellers, setBestSellers] = useState([]);
   const [scrollProgress, setScrollProgress] = useState(0);
+  const [activeSlide, setActiveSlide] = useState(0);
   const sliderRef = useRef(null);
+  const dragState = useRef({ active: false, startX: 0, scrollLeft: 0, moved: false });
 
   const LA_PERLE_TEXT = "Pearls before wine.";
   const [typedLaPerle, setTypedLaPerle] = useState("");
@@ -114,76 +116,104 @@ export default function Home() {
     loadBestSellers();
   }, []);
 
-  const handleScroll = () => {
+  useEffect(() => {
+    if (bestSellers.length === 0) return;
     const slider = sliderRef.current;
-    if (!slider) return;
+    if (slider) slider.style.cursor = "grab";
+    const raf = requestAnimationFrame(() => syncActiveSlideFromScroll());
+    return () => cancelAnimationFrame(raf);
+  }, [bestSellers]);
+
+  const getSlideScrollPosition = (slideEl) => {
+    const slider = sliderRef.current;
+    if (!slider || !slideEl) return 0;
+    return slideEl.getBoundingClientRect().left - slider.getBoundingClientRect().left + slider.scrollLeft;
+  };
+
+  const syncActiveSlideFromScroll = () => {
+    const slider = sliderRef.current;
+    const slides = slider?.querySelectorAll("[data-slide]");
+    if (!slider || !slides?.length) return;
+
     const maxScroll = slider.scrollWidth - slider.clientWidth;
     if (maxScroll <= 0) {
       setScrollProgress(0);
-    } else {
-      setScrollProgress(slider.scrollLeft / maxScroll);
+      setActiveSlide(0);
+      return;
     }
+
+    setScrollProgress(slider.scrollLeft / maxScroll);
+
+    let closestIndex = 0;
+    let closestDistance = Infinity;
+    slides.forEach((slide, index) => {
+      const distance = Math.abs(getSlideScrollPosition(slide) - slider.scrollLeft);
+      if (distance < closestDistance) {
+        closestDistance = distance;
+        closestIndex = index;
+      }
+    });
+    setActiveSlide(closestIndex);
   };
 
-  const scrollLeft = () => {
-    if (sliderRef.current) {
-      sliderRef.current.scrollBy({ left: -380, behavior: "smooth" });
-    }
+  const handleScroll = () => {
+    syncActiveSlideFromScroll();
   };
 
-  const scrollRight = () => {
-    if (sliderRef.current) {
-      sliderRef.current.scrollBy({ left: 380, behavior: "smooth" });
-    }
+  const scrollToSlide = (index) => {
+    const slider = sliderRef.current;
+    const slides = slider?.querySelectorAll("[data-slide]");
+    if (!slider || !slides?.length) return;
+
+    const clamped = Math.max(0, Math.min(index, slides.length - 1));
+    const targetLeft = getSlideScrollPosition(slides[clamped]);
+    slider.scrollTo({ left: targetLeft, behavior: "smooth" });
+    setActiveSlide(clamped);
   };
 
+  const scrollLeft = () => scrollToSlide(activeSlide - 1);
+  const scrollRight = () => scrollToSlide(activeSlide + 1);
 
-  useEffect(() => {
+  const handleSliderPointerDown = (e) => {
+    if (e.button !== 0) return;
     const slider = sliderRef.current;
     if (!slider) return;
 
-    let isDown = false;
-    let startX;
-    let scrollLeftVal;
-
-    const onMouseDown = (e) => {
-      isDown = true;
-      slider.style.cursor = "grabbing";
-      startX = e.pageX - slider.offsetLeft;
-      scrollLeftVal = slider.scrollLeft;
+    dragState.current = {
+      active: true,
+      startX: e.clientX,
+      scrollLeft: slider.scrollLeft,
+      moved: false,
     };
+    slider.setPointerCapture(e.pointerId);
+    slider.style.scrollSnapType = "none";
+    slider.style.cursor = "grabbing";
+  };
 
-    const onMouseLeave = () => {
-      isDown = false;
-      slider.style.cursor = "grab";
-    };
+  const handleSliderPointerMove = (e) => {
+    const slider = sliderRef.current;
+    if (!slider || !dragState.current.active) return;
 
-    const onMouseUp = () => {
-      isDown = false;
-      slider.style.cursor = "grab";
-    };
+    e.preventDefault();
+    const walk = e.clientX - dragState.current.startX;
+    if (Math.abs(walk) > 6) dragState.current.moved = true;
+    slider.scrollLeft = dragState.current.scrollLeft - walk;
+  };
 
-    const onMouseMove = (e) => {
-      if (!isDown) return;
-      e.preventDefault();
-      const x = e.pageX - slider.offsetLeft;
-      const walk = (x - startX) * 1.5;
-      slider.scrollLeft = scrollLeftVal - walk;
-    };
+  const handleSliderPointerUp = (e) => {
+    const slider = sliderRef.current;
+    if (!slider || !dragState.current.active) return;
 
-    slider.addEventListener("mousedown", onMouseDown);
-    slider.addEventListener("mouseleave", onMouseLeave);
-    slider.addEventListener("mouseup", onMouseUp);
-    slider.addEventListener("mousemove", onMouseMove);
+    dragState.current.active = false;
+    slider.releasePointerCapture(e.pointerId);
+    slider.style.scrollSnapType = "";
     slider.style.cursor = "grab";
+    syncActiveSlideFromScroll();
 
-    return () => {
-      slider.removeEventListener("mousedown", onMouseDown);
-      slider.removeEventListener("mouseleave", onMouseLeave);
-      slider.removeEventListener("mouseup", onMouseUp);
-      slider.removeEventListener("mousemove", onMouseMove);
-    };
-  }, [bestSellers]);
+    window.setTimeout(() => {
+      dragState.current.moved = false;
+    }, 80);
+  };
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -251,7 +281,7 @@ export default function Home() {
 
         <div
           id="hero-statement-section"
-          className="relative py-28 px-6 md:px-12 flex flex-col items-center text-center bg-white overflow-hidden min-h-[500px] justify-center"
+          className="relative section-viewport py-28 px-6 md:px-12 flex flex-col items-center text-center bg-white overflow-hidden justify-center"
         >
 
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
@@ -295,7 +325,7 @@ export default function Home() {
 
         <div
           id="HeroMediaBackground-template--24699078279507__hero_media_background_wLkGTa"
-          className="hero-media-background relative w-full h-[500px] md:h-[600px] lg:h-[700px] flex items-center justify-center overflow-hidden"
+          className="hero-media-background relative w-full section-viewport flex items-center justify-center overflow-hidden"
         >
 
           <div className="hero-media-background__media hero-media-background__image absolute inset-0 z-0 overflow-hidden">
@@ -314,7 +344,7 @@ export default function Home() {
             style={{ transform: `translateY(${contentTranslateY}px)`, transition: 'transform 100ms ease-out' }}
           >
             <div className="hero-media-background__content flex flex-col items-center gap-6">
-              <h6 className="hero-media-background__eyebrow font-assistant text-[11px] md:text-[12px] font-semibold uppercase tracking-[0.25em] text-[#c5a059]">
+              <h6 className="hero-media-background__eyebrow font-assistant text-[11px] md:text-[12px] font-semibold uppercase tracking-[0.25em] text-white">
                 Caviar
               </h6>
 
@@ -341,28 +371,27 @@ export default function Home() {
         </div>
 
 
-        <div className="w-full py-20 bg-white relative border-t border-black/5 overflow-hidden">
-          <h2 className="font-ivy text-[34px] md:text-[44px] text-gh-dark text-center font-light mb-12 tracking-wide uppercase">
+        <div className="w-full section-viewport py-20 bg-white relative border-t border-black/5 overflow-hidden flex flex-col justify-center">
+          <h2 className="font-ivy text-[34px] md:text-[44px] text-gh-dark text-center font-light mb-12 tracking-wide uppercase px-6">
             Best Sellers
           </h2>
-          
-          <div className="relative max-w-7xl mx-auto px-6 md:px-12 group">
 
+          <div className="relative w-full group">
             <button
               type="button"
               onClick={scrollLeft}
-              className="absolute left-6 md:left-12 top-[40%] -translate-y-1/2 bg-black/[0.02] hover:bg-black/[0.06] text-[#121212]/70 h-16 w-10 z-20 flex items-center justify-center transition-colors cursor-pointer"
+              className="absolute left-3 md:left-5 top-[40%] -translate-y-1/2 bg-black/[0.02] hover:bg-black/[0.06] text-[#121212]/70 h-16 w-10 z-20 flex items-center justify-center transition-colors cursor-pointer"
               aria-label="Scroll left"
             >
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.2} stroke="currentColor" className="w-6 h-6">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
               </svg>
             </button>
-            
+
             <button
               type="button"
               onClick={scrollRight}
-              className="absolute right-6 md:right-12 top-[40%] -translate-y-1/2 bg-black/[0.02] hover:bg-black/[0.06] text-[#121212]/70 h-16 w-10 z-20 flex items-center justify-center transition-colors cursor-pointer"
+              className="absolute right-3 md:right-5 top-[40%] -translate-y-1/2 bg-black/[0.02] hover:bg-black/[0.06] text-[#121212]/70 h-16 w-10 z-20 flex items-center justify-center transition-colors cursor-pointer"
               aria-label="Scroll right"
             >
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.2} stroke="currentColor" className="w-6 h-6">
@@ -370,36 +399,47 @@ export default function Home() {
               </svg>
             </button>
 
-
             <div
               ref={sliderRef}
               onScroll={handleScroll}
-              className="flex overflow-x-auto gap-8 scrollbar-none scroll-smooth pb-4 px-2 select-none"
-              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+              onPointerDown={handleSliderPointerDown}
+              onPointerMove={handleSliderPointerMove}
+              onPointerUp={handleSliderPointerUp}
+              onPointerCancel={handleSliderPointerUp}
+              className="relative flex overflow-x-auto gap-4 md:gap-5 scrollbar-none scroll-smooth pb-4 px-3 md:px-5 snap-x snap-mandatory touch-pan-x"
+              style={{ scrollbarWidth: "none", msOverflowStyle: "none", WebkitOverflowScrolling: "touch" }}
             >
               {bestSellers.map((product) => {
                 const primaryImage = product.images?.[0] || "https://images.unsplash.com/photo-1544025162-d76694265947?q=80&w=800";
                 return (
-                  <Link
+                  <div
                     key={product.id}
-                    to="/collections/all"
-                    className="min-w-[75%] sm:min-w-[46%] md:min-w-[31.3%] flex flex-col items-center text-center group outline-none"
+                    data-slide
+                    className="snap-start shrink-0 w-[calc(100vw-2.5rem)] sm:w-[calc(50vw-1.75rem)] md:w-[calc(34vw-1.25rem)] lg:w-[calc(33.333vw-1rem)] flex flex-col items-center text-center"
                   >
-                    <div className="aspect-square w-full overflow-hidden bg-transparent mb-5 relative">
-                      <img
-                        src={primaryImage}
-                        alt={product.title}
-                        className="w-full h-full object-cover transition-transform duration-[800ms] ease-in-out group-hover:scale-105 pointer-events-none"
-                      />
-                    </div>
-                    <h3 className="font-assistant text-[13px] font-semibold uppercase tracking-[3px] text-[#121212] leading-none mb-1">
-                      {product.title}
-                    </h3>
-                  </Link>
+                    <Link
+                      to={`/products/${product.id}`}
+                      draggable={false}
+                      onClick={(e) => {
+                        if (dragState.current.moved) e.preventDefault();
+                      }}
+                      className="flex flex-col items-center text-center group outline-none w-full"
+                    >
+                      <div className="aspect-square w-full overflow-hidden bg-transparent mb-5 relative">
+                        <img
+                          src={primaryImage}
+                          alt={product.title}
+                          className="w-full h-full object-cover transition-transform duration-[800ms] ease-in-out group-hover:scale-105 pointer-events-none"
+                        />
+                      </div>
+                      <h3 className="font-assistant text-[13px] font-semibold uppercase tracking-[3px] text-[#121212] leading-none mb-1">
+                        {product.title}
+                      </h3>
+                    </Link>
+                  </div>
                 );
               })}
             </div>
-
 
             <div className="w-64 h-[2px] bg-black/10 relative mt-12 mx-auto overflow-hidden">
               <div
@@ -416,7 +456,7 @@ export default function Home() {
 
         <div
           id="la-perle-section"
-          className="relative w-full h-[450px] sm:h-[500px] md:h-[600px] flex items-center overflow-hidden bg-[#f4f4f4] border-t border-black/5"
+          className="relative w-full section-viewport flex items-center overflow-hidden bg-[#f4f4f4] border-t border-black/5"
         >
 
           <div className="absolute inset-0 z-0 select-none pointer-events-none">
@@ -430,7 +470,7 @@ export default function Home() {
 
           <div className="relative z-10 max-w-7xl mx-auto px-6 md:px-12 lg:px-20 w-full h-full flex items-center justify-start">
             <div className="max-w-[85%] sm:max-w-[60%] md:max-w-xl flex flex-col items-start text-left gap-4 md:gap-5">
-              <h6 className="font-assistant text-[11px] md:text-[12px] font-semibold uppercase tracking-[0.25em] text-[#c5a059]">
+              <h6 className="font-assistant text-[11px] md:text-[12px] font-semibold uppercase tracking-[0.25em] text-gh-gold">
                 LA PERLE
               </h6>
               
@@ -465,7 +505,7 @@ export default function Home() {
 
         <div
           id="caviar-x-section"
-          className="relative w-full h-[450px] sm:h-[500px] md:h-[600px] flex items-center overflow-hidden bg-[#f4f4f4] border-t border-black/5"
+          className="relative w-full section-viewport flex items-center overflow-hidden bg-[#f4f4f4] border-t border-black/5"
         >
 
           <div className="absolute inset-0 z-0 select-none pointer-events-none">
@@ -479,7 +519,7 @@ export default function Home() {
 
           <div className="relative z-10 max-w-7xl mx-auto px-6 md:px-12 lg:px-20 w-full h-full flex items-center justify-end">
             <div className="max-w-[85%] sm:max-w-[60%] md:max-w-xl flex flex-col items-start text-left gap-4 md:gap-5">
-              <h6 className="font-assistant text-[11px] md:text-[12px] font-semibold uppercase tracking-[0.25em] text-[#c5a059]">
+              <h6 className="font-assistant text-[11px] md:text-[12px] font-semibold uppercase tracking-[0.25em] text-gh-gold">
                 CAVIAR X
               </h6>
               

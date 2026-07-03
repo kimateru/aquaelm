@@ -5,7 +5,7 @@ export default function Contact() {
   return (
     <div className="min-h-screen bg-white flex flex-col font-sans select-none">
       <Navbar />
-      <main className="flex-grow flex flex-col pt-16 md:pt-24 pb-28 px-6 md:px-12 max-w-7xl mx-auto w-full text-left">
+      <main className="flex-grow section-viewport flex flex-col justify-center pt-16 md:pt-24 pb-28 px-6 md:px-12 max-w-7xl mx-auto w-full text-left">
         <h1 className="font-ivy text-[48px] sm:text-[62px] md:text-[72px] font-light text-[#121212] mb-5 tracking-tight leading-tight">
           Contact Support
         </h1>

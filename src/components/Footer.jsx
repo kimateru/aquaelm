@@ -1,7 +1,64 @@
+import { useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 
-const LOGO_URL =
-  "https://gourmethouse.com/cdn/shop/files/ghc-logo-gold.png?v=1763673785&width=180";
+function fitWordmarkToContainer(container, text) {
+  const maxWidth = container.clientWidth;
+  if (maxWidth <= 0) return;
+
+  let lo = 48;
+  let hi = Math.min(maxWidth, 512);
+
+  text.style.fontSize = `${hi}px`;
+  if (text.scrollWidth <= maxWidth) return;
+
+  while (hi - lo > 1) {
+    const mid = Math.floor((lo + hi) / 2);
+    text.style.fontSize = `${mid}px`;
+    if (text.scrollWidth > maxWidth) {
+      hi = mid;
+    } else {
+      lo = mid;
+    }
+  }
+
+  text.style.fontSize = `${lo}px`;
+}
+
+function FooterWordmark() {
+  const wrapRef = useRef(null);
+  const textRef = useRef(null);
+
+  useEffect(() => {
+    const fit = () => {
+      const wrap = wrapRef.current;
+      const text = textRef.current;
+      if (!wrap || !text) return;
+      fitWordmarkToContainer(wrap, text);
+    };
+
+    fit();
+    document.fonts?.ready.then(fit).catch(() => {});
+
+    const ro = new ResizeObserver(fit);
+    if (wrapRef.current) ro.observe(wrapRef.current);
+
+    window.addEventListener("resize", fit);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", fit);
+    };
+  }, []);
+
+  return (
+    <div ref={wrapRef} className="w-full pt-4 md:pt-6">
+      <Link to="/" className="block outline-none w-full">
+        <span ref={textRef} className="footer-wordmark">
+          AQUAELM
+        </span>
+      </Link>
+    </div>
+  );
+}
 
 export default function Footer() {
   const handlePreventDefault = (e) => {
@@ -9,141 +66,70 @@ export default function Footer() {
   };
 
   return (
-    <footer className="bg-gh-dark text-white select-none pt-16 pb-10 px-6 md:px-12 lg:px-24 border-t border-white/5">
-      <div className="max-w-7xl mx-auto flex flex-col gap-12 md:gap-16">
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-8 items-start">
-  
-          <div className="md:col-span-1">
-            <Link to="/" className="inline-block outline-none">
-              <img
-                src={LOGO_URL}
-                alt="Gourmet House Caviar"
-                width={80}
-                height={80}
-                className="h-20 w-20 object-contain hover:opacity-90 transition-opacity"
-              />
-            </Link>
-          </div>
-
-
-          <div className="flex flex-col gap-4">
-            <h5 className="font-assistant text-[12px] font-semibold uppercase tracking-[3px] text-gh-gold">
-              Explore
-            </h5>
-            <ul className="flex flex-col gap-2.5 font-assistant text-[13px] text-white/70 font-light">
-              <li>
-                <Link to="/" className="hover:text-white transition-colors">
-                  Home
-                </Link>
-              </li>
-              <li>
-                <Link to="/pages/about-us" className="hover:text-white transition-colors">
-                  Our Story
-                </Link>
-              </li>
-              <li>
-                <Link to="/collections/all" className="hover:text-white transition-colors">
-                  Our Shop
-                </Link>
-              </li>
-              <li>
-                <Link to="/pages/contact-us" className="hover:text-white transition-colors">
-                  Contact Us
-                </Link>
-              </li>
+    <footer className="brand-surface bg-aquaelm-blue text-white select-none border-t border-aquaelm-accent/20 pt-14 pb-8 md:pb-10">
+      <div className="site-gutter flex flex-col brand-surface bg-aquaelm-blue">
+        <div className="flex flex-col md:flex-row md:flex-nowrap md:justify-between gap-10 md:gap-6 items-start w-full pb-10 md:pb-12 border-b border-aquaelm-accent/20">
+          <div className="flex flex-col gap-4 shrink-0">
+            <h5 className="footer-heading">Explore</h5>
+            <ul className="flex flex-col gap-2.5 font-assistant font-light">
+              <li><Link to="/" className="footer-link">Home</Link></li>
+              <li><Link to="/pages/about-us" className="footer-link">Our Story</Link></li>
+              <li><Link to="/collections/all" className="footer-link">Our Shop</Link></li>
+              <li><Link to="/pages/contact-us" className="footer-link">Contact Us</Link></li>
             </ul>
           </div>
 
-
-          <div className="flex flex-col gap-4">
-            <h5 className="font-assistant text-[12px] font-semibold uppercase tracking-[3px] text-gh-gold">
-              Shop
-            </h5>
-            <ul className="flex flex-col gap-2.5 font-assistant text-[13px] text-white/70 font-light">
+          <div className="flex flex-col gap-4 shrink-0">
+            <h5 className="footer-heading">Shop</h5>
+            <ul className="flex flex-col gap-2.5 font-assistant font-light">
               <li>
-                <Link
-                  to="/collections/all"
-                  state={{ category: "From the sea" }}
-                  className="hover:text-white transition-colors"
-                >
+                <Link to="/collections/all" state={{ category: "From the sea" }} className="footer-link">
                   From the Sea
                 </Link>
               </li>
               <li>
-                <Link
-                  to="/collections/all"
-                  state={{ category: "From the land" }}
-                  className="hover:text-white transition-colors"
-                >
+                <Link to="/collections/all" state={{ category: "From the land" }} className="footer-link">
                   From the Land
                 </Link>
               </li>
               <li>
-                <Link
-                  to="/collections/all"
-                  state={{ category: "Gifts and Others" }}
-                  className="hover:text-white transition-colors"
-                >
+                <Link to="/collections/all" state={{ category: "Gifts and Others" }} className="footer-link">
                   Gifts and Others
                 </Link>
               </li>
               <li>
-                <Link
-                  to="/collections/all"
-                  state={{ category: "Gifts and Others" }}
-                  className="hover:text-white transition-colors"
-                >
+                <Link to="/collections/all" state={{ category: "Gifts and Others" }} className="footer-link">
                   Health Products
                 </Link>
               </li>
             </ul>
           </div>
 
-
-          <div className="flex flex-col gap-4">
-            <h5 className="font-assistant text-[12px] font-semibold uppercase tracking-[3px] text-gh-gold">
-              Concierge
-            </h5>
-            <ul className="flex flex-col gap-2.5 font-assistant text-[13px] text-white/70 font-light">
+          <div className="flex flex-col gap-4 shrink-0">
+            <h5 className="footer-heading">Concierge</h5>
+            <ul className="flex flex-col gap-2.5 font-assistant font-light">
               <li>
-                <Link to="/cart" className="hover:text-white transition-colors">
-                  Cart
-                </Link>
-              </li>
-              <li>
-                <a
-                  href="#my-account"
-                  onClick={handlePreventDefault}
-                  className="hover:text-white transition-colors cursor-default"
-                >
+                <a href="#my-account" onClick={handlePreventDefault} className="footer-link cursor-default">
                   My Account
                 </a>
               </li>
               <li>
-                <a
-                  href="#privacy-policy"
-                  onClick={handlePreventDefault}
-                  className="hover:text-white transition-colors cursor-default"
-                >
+                <a href="#privacy-policy" onClick={handlePreventDefault} className="footer-link cursor-default">
                   Privacy Policy
                 </a>
               </li>
             </ul>
           </div>
 
-
-          <div className="flex flex-col gap-4">
-            <h5 className="font-assistant text-[12px] font-semibold uppercase tracking-[3px] text-gh-gold">
-              Socials
-            </h5>
-            <ul className="flex flex-col gap-2.5 font-assistant text-[13px] text-white/70 font-light">
+          <div className="flex flex-col gap-4 shrink-0">
+            <h5 className="footer-heading">Socials</h5>
+            <ul className="flex flex-col gap-2.5 font-assistant font-light">
               <li>
                 <a
                   href="https://www.instagram.com/gourmethousedeli/"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="hover:text-white transition-colors"
+                  className="footer-link"
                 >
                   Instagram
                 </a>
@@ -153,7 +139,7 @@ export default function Footer() {
                   href="https://www.facebook.com/gourmethousecaviar/"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="hover:text-white transition-colors"
+                  className="footer-link"
                 >
                   Facebook
                 </a>
@@ -162,10 +148,11 @@ export default function Footer() {
           </div>
         </div>
 
-
-        <div className="border-t border-white/5 pt-8 flex items-center justify-between text-white/40 font-assistant text-xs font-light">
-          <span>&copy; {new Date().getFullYear()} Gourmet House</span>
+        <div className="w-full pt-6 md:pt-8 pb-2 text-aquaelm-accent-soft/70 font-assistant text-xs font-light">
+          <span>&copy; {new Date().getFullYear()} Aquaelm</span>
         </div>
+
+        <FooterWordmark />
       </div>
     </footer>
   );
