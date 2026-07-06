@@ -1,36 +1,33 @@
-import { useRef, useState, useEffect } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Navigation } from "swiper/modules";
 import "swiper/css";
-
-const FALLBACK_IMAGE =
-  "https://images.unsplash.com/photo-1544025162-d76694265947?q=80&w=800";
+import ProductImagePair from "./ProductImagePair";
 
 export default function BestSellersSlider({ products = [] }) {
-  const prevRef = useRef(null);
-  const nextRef = useRef(null);
   const [swiperInstance, setSwiperInstance] = useState(null);
   const [scrollProgress, setScrollProgress] = useState(0);
+  const [isBeginning, setIsBeginning] = useState(true);
+  const [isEnd, setIsEnd] = useState(false);
 
-  useEffect(() => {
-    if (!swiperInstance || !prevRef.current || !nextRef.current) return;
-
-    swiperInstance.params.navigation.prevEl = prevRef.current;
-    swiperInstance.params.navigation.nextEl = nextRef.current;
-    swiperInstance.navigation.destroy();
-    swiperInstance.navigation.init();
-    swiperInstance.navigation.update();
-  }, [swiperInstance, products.length]);
+  const updateSliderState = (swiper) => {
+    setScrollProgress(swiper.progress);
+    setIsBeginning(swiper.isBeginning);
+    setIsEnd(swiper.isEnd);
+  };
 
   if (products.length === 0) return null;
 
+  const navBtnClass =
+    "best-sellers-nav absolute top-[38%] z-20 flex h-14 w-9 -translate-y-1/2 cursor-pointer items-center justify-center bg-black/[0.03] text-[#121212]/70 transition-colors hover:bg-black/[0.06] disabled:cursor-default disabled:opacity-35 md:h-16 md:w-10";
+
   return (
-    <div className="relative w-full group">
+    <div className="relative w-full">
       <button
-        ref={prevRef}
         type="button"
-        className="best-sellers-nav best-sellers-nav-prev absolute left-3 md:left-5 top-[40%] -translate-y-1/2 bg-black/[0.02] hover:bg-black/[0.06] text-[#121212]/70 h-16 w-10 z-20 flex items-center justify-center transition-colors cursor-pointer"
+        onClick={() => swiperInstance?.slidePrev()}
+        disabled={isBeginning}
+        className={`${navBtnClass} best-sellers-nav-prev left-2 sm:left-3 md:left-5`}
         aria-label="Scroll left"
       >
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.2} stroke="currentColor" className="w-6 h-6">
@@ -39,9 +36,10 @@ export default function BestSellersSlider({ products = [] }) {
       </button>
 
       <button
-        ref={nextRef}
         type="button"
-        className="best-sellers-nav best-sellers-nav-next absolute right-3 md:right-5 top-[40%] -translate-y-1/2 bg-black/[0.02] hover:bg-black/[0.06] text-[#121212]/70 h-16 w-10 z-20 flex items-center justify-center transition-colors cursor-pointer"
+        onClick={() => swiperInstance?.slideNext()}
+        disabled={isEnd}
+        className={`${navBtnClass} best-sellers-nav-next right-2 sm:right-3 md:right-5`}
         aria-label="Scroll right"
       >
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.2} stroke="currentColor" className="w-6 h-6">
@@ -50,9 +48,7 @@ export default function BestSellersSlider({ products = [] }) {
       </button>
 
       <Swiper
-        className="best-sellers-swiper pb-4 !px-3 md:!px-5"
-        modules={[Navigation]}
-        navigation
+        className="best-sellers-swiper pb-4 !px-4 md:!px-5"
         slidesPerView="auto"
         spaceBetween={16}
         grabCursor
@@ -61,44 +57,44 @@ export default function BestSellersSlider({ products = [] }) {
         breakpoints={{
           768: { spaceBetween: 20 },
         }}
-        onBeforeInit={(swiper) => {
-          swiper.params.navigation.prevEl = prevRef.current;
-          swiper.params.navigation.nextEl = nextRef.current;
+        onSwiper={(swiper) => {
+          setSwiperInstance(swiper);
+          updateSliderState(swiper);
         }}
-        onSwiper={setSwiperInstance}
-        onProgress={(swiper, progress) => setScrollProgress(progress)}
-        onSlideChange={(swiper) => setScrollProgress(swiper.progress)}
+        onProgress={updateSliderState}
+        onSlideChange={updateSliderState}
+        onReachBeginning={() => setIsBeginning(true)}
+        onReachEnd={() => setIsEnd(true)}
+        onFromEdge={(swiper) => {
+          setIsBeginning(swiper.isBeginning);
+          setIsEnd(swiper.isEnd);
+        }}
       >
-        {products.map((product) => {
-          const primaryImage = product.images?.[0] || FALLBACK_IMAGE;
-          return (
-            <SwiperSlide
-              key={product.id}
-              className="!w-[calc(100vw-2.5rem)] sm:!w-[calc(50vw-1.75rem)] md:!w-[calc(34vw-1.25rem)] lg:!w-[calc(33.333vw-1rem)]"
+        {products.map((product) => (
+          <SwiperSlide
+            key={product.id}
+            className="!w-[calc(100vw-2rem)] sm:!w-[calc(50vw-1.75rem)] md:!w-[calc(34vw-1.25rem)] lg:!w-[calc(33.333vw-1rem)]"
+          >
+            <Link
+              to={`/products/${product.id}`}
+              className="group/product-card flex w-full flex-col items-center text-center outline-none"
             >
-              <Link
-                to={`/products/${product.id}`}
-                className="flex flex-col items-center text-center group outline-none w-full"
-              >
-                <div className="aspect-square w-full overflow-hidden bg-transparent mb-5 relative">
-                  <img
-                    src={primaryImage}
-                    alt={product.title}
-                    className="w-full h-full object-cover transition-transform duration-[800ms] ease-in-out group-hover:scale-105 pointer-events-none"
-                  />
-                </div>
-                <h3 className="font-assistant text-[13px] font-semibold uppercase tracking-[3px] text-[#121212] leading-none mb-1">
-                  {product.title}
-                </h3>
-              </Link>
-            </SwiperSlide>
-          );
-        })}
+              <ProductImagePair
+                images={product.images}
+                title={product.title}
+                className="mb-5 bg-transparent"
+              />
+              <h3 className="font-assistant text-[15px] md:text-[13px] font-semibold uppercase tracking-[3px] text-[#121212] leading-none mb-1">
+                {product.title}
+              </h3>
+            </Link>
+          </SwiperSlide>
+        ))}
       </Swiper>
 
-      <div className="w-64 h-[2px] bg-black/10 relative mt-12 mx-auto overflow-hidden">
+      <div className="relative mx-auto mt-8 h-[2px] w-64 overflow-hidden bg-black/10 md:mt-12">
         <div
-          className="absolute top-0 bottom-0 left-0 bg-gh-gold transition-transform duration-150"
+          className="absolute bottom-0 left-0 top-0 bg-gh-gold transition-transform duration-150"
           style={{
             width: "40%",
             transform: `translateX(${scrollProgress * 150}%)`,

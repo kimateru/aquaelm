@@ -1,7 +1,9 @@
 import type { Product } from "./types";
 
-const PLACEHOLDER_IMAGE =
-  "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQK8oc65wz7qGKYJ8Fbn_-xiVevmV2uFegtc6xucvsD20SUHmF8HuNmqvo&s=10";
+export const PRODUCT_IMAGE_PRIMARY = "/products/product1.png";
+export const PRODUCT_IMAGE_SECONDARY = "/products/product2.png";
+
+export const DEFAULT_PRODUCT_IMAGES = [PRODUCT_IMAGE_PRIMARY, PRODUCT_IMAGE_SECONDARY];
 
 export const PRODUCTS: Product[] = [
   {
@@ -16,7 +18,7 @@ export const PRODUCTS: Product[] = [
     texture: "Silk texture.",
     description:
       "China · Huso huso. Pearl size 3.3–3.5 mm. Lighter grey with pronounced marbling. Low salinity with marine mineral and cream. Silk texture.",
-    images: [PLACEHOLDER_IMAGE, PLACEHOLDER_IMAGE],
+    images: DEFAULT_PRODUCT_IMAGES,
     product_variants: [
       { id: "v1", weight: "30g", price: 225.0 },
       { id: "v2", weight: "50g", price: 375.0 },
@@ -40,7 +42,7 @@ export const PRODUCTS: Product[] = [
     texture: "Firm and popping texture.",
     description:
       "Iran · Acipenser gueldenstaedtii. Pearl size 2.9–3.2 mm. Amber gold with warm hues. Rich nuttiness with toasted oak notes. Firm and popping texture.",
-    images: [PLACEHOLDER_IMAGE, PLACEHOLDER_IMAGE],
+    images: DEFAULT_PRODUCT_IMAGES,
     product_variants: [
       { id: "v4", weight: "30g", price: 180.0 },
       { id: "v5", weight: "50g", price: 290.0 },
@@ -59,7 +61,7 @@ export const PRODUCTS: Product[] = [
     texture: "Creamy and melting texture.",
     description:
       "Bulgaria · Acipenser stellatus. Pearl size 2.0–2.5 mm. Platinum grey. Intense marine salinity with iodine. Creamy and melting texture.",
-    images: [PLACEHOLDER_IMAGE, PLACEHOLDER_IMAGE],
+    images: DEFAULT_PRODUCT_IMAGES,
     product_variants: [
       { id: "v7", weight: "30g", price: 130.0 },
       { id: "v8", weight: "50g", price: 210.0 },

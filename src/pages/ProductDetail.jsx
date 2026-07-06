@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import Navbar from "../components/Navbar";
-import Footer from "../components/Footer";
+import PageShell from "../components/PageShell";
 import { fetchProductById } from "../services/products";
+import { DEFAULT_PRODUCT_IMAGES } from "../data/products";
 import {
   ORDER_PHONE,
   ORDER_PHONE_DISPLAY,
@@ -36,6 +36,7 @@ export default function ProductDetail() {
           if (data.product_variants && data.product_variants.length > 0) {
             setSelectedVariant(data.product_variants[0]);
           }
+          setCurrentImageIndex(0);
         }
       } catch (err) {
         setError(err.message || "An error occurred loading the product.");
@@ -62,35 +63,27 @@ export default function ProductDetail() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-white flex flex-col font-sans select-none">
-        <Navbar />
-        <main className="flex-grow section-viewport flex items-center justify-center">
-          <div className="flex flex-col items-center gap-4">
-            <div className="w-10 h-10 border-2 border-gh-gold border-t-transparent rounded-full animate-spin"></div>
-            <p className="font-assistant text-xs uppercase tracking-[2px] text-[#121212]/60">Loading Details...</p>
-          </div>
-        </main>
-        <Footer />
-      </div>
+      <PageShell mainClassName="flex min-h-[50vh] items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-10 h-10 border-2 border-gh-gold border-t-transparent rounded-full animate-spin"></div>
+          <p className="font-assistant text-xs uppercase tracking-[2px] text-[#121212]/60">Loading Details...</p>
+        </div>
+      </PageShell>
     );
   }
 
   if (error || !product) {
     return (
-      <div className="min-h-screen bg-white flex flex-col font-sans select-none">
-        <Navbar />
-        <main className="flex-grow section-viewport flex flex-col items-center justify-center px-6 text-center max-w-md mx-auto">
-          <p className="text-red-500 font-semibold mb-2">Error Loading Product</p>
-          <p className="text-xs text-gh-dark/60 mb-6">{error || "Product not found."}</p>
-          <Link
-            to="/collections/all"
-            className="bg-gh-gold text-white text-[11px] uppercase tracking-[2px] font-semibold px-6 py-2.5 hover:bg-aquaelm-blue-light transition-colors duration-300 rounded-sm"
-          >
-            Back to Shop
-          </Link>
-        </main>
-        <Footer />
-      </div>
+      <PageShell mainClassName="flex min-h-[50vh] flex-col items-center justify-center site-gutter-x text-center max-w-md mx-auto">
+        <p className="text-red-500 font-semibold mb-2">Error Loading Product</p>
+        <p className="text-xs text-gh-dark/60 mb-6">{error || "Product not found."}</p>
+        <Link
+          to="/collections/all"
+          className="bg-gh-gold text-white text-[11px] uppercase tracking-[2px] font-semibold px-6 py-2.5 hover:bg-aquaelm-blue-light transition-colors duration-300 rounded-sm"
+        >
+          Back to Shop
+        </Link>
+      </PageShell>
     );
   }
 
@@ -107,7 +100,7 @@ export default function ProductDetail() {
     product_variants = [],
   } = product;
 
-  const currentImage = images[currentImageIndex] || "https://images.unsplash.com/photo-1544025162-d76694265947?q=80&w=800";
+  const currentImage = images[currentImageIndex] || DEFAULT_PRODUCT_IMAGES[0];
   const categoryLabel = category && category.toLowerCase().includes("sea") ? "CAVIAR" : (category ? category.toUpperCase() : "CAVIAR");
   const currentPrice = selectedVariant ? selectedVariant.price : 0;
   const priceFormatted = `€${currentPrice.toFixed(2).replace(".", ",")}`;
@@ -130,17 +123,14 @@ export default function ProductDetail() {
     "w-full border-b border-black/10 bg-transparent py-2.5 font-assistant text-sm text-[#121212] outline-none focus:border-gh-gold transition-colors placeholder:text-[#121212]/40";
 
   return (
-    <div className="min-h-screen bg-white flex flex-col font-sans select-none">
-      <Navbar />
-
-      <main className="flex-grow section-viewport flex flex-col justify-center pb-24">
-        <div className="max-w-7xl mx-auto w-full px-6 md:px-12 py-12 md:py-20">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-16 items-start">
-            <div className="relative w-full aspect-square bg-[#f9f6f0] overflow-hidden group">
+    <PageShell mainClassName="flex flex-col pb-20 md:pb-24">
+        <div className="w-full mx-auto site-gutter-x md:px-8 lg:px-10 py-6 md:py-12 lg:py-14">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 xl:gap-16 items-start">
+            <div className="relative w-full aspect-[4/5] sm:aspect-square lg:aspect-auto lg:min-h-[min(78vh,920px)] bg-[#f9f6f0] overflow-hidden group">
               <img
                 src={currentImage}
                 alt={title}
-                className="w-full h-full object-cover transition-all duration-[600ms] ease-out"
+                className="absolute inset-0 w-full h-full object-cover transition-all duration-[600ms] ease-out"
               />
 
               {images.length > 1 && (
@@ -148,7 +138,7 @@ export default function ProductDetail() {
                   <button
                     type="button"
                     onClick={handlePrevImage}
-                    className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-black w-10 h-10 flex items-center justify-center cursor-pointer shadow-md transition-colors z-10 opacity-0 group-hover:opacity-100 duration-300"
+                    className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-black w-10 h-10 flex items-center justify-center cursor-pointer shadow-md transition-colors z-10 opacity-100 md:opacity-0 md:group-hover:opacity-100 duration-300"
                     aria-label="Previous image"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
@@ -159,7 +149,7 @@ export default function ProductDetail() {
                   <button
                     type="button"
                     onClick={handleNextImage}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-black w-10 h-10 flex items-center justify-center cursor-pointer shadow-md transition-colors z-10 opacity-0 group-hover:opacity-100 duration-300"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-black w-10 h-10 flex items-center justify-center cursor-pointer shadow-md transition-colors z-10 opacity-100 md:opacity-0 md:group-hover:opacity-100 duration-300"
                     aria-label="Next image"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
@@ -170,17 +160,17 @@ export default function ProductDetail() {
               )}
             </div>
 
-            <div className="flex flex-col items-start pt-2">
-              <h6 className="font-assistant text-[11px] md:text-[12px] font-semibold uppercase tracking-[0.25em] text-gh-gold mb-2 leading-none">
+            <div className="flex flex-col items-start lg:pt-4 lg:pr-2 xl:pr-6">
+              <h6 className="font-assistant text-[12px] md:text-[13px] font-semibold uppercase tracking-[0.25em] text-gh-gold mb-3 leading-none">
                 {categoryLabel}
               </h6>
 
-              <h1 className="font-ivy text-[34px] sm:text-[44px] text-[#121212] leading-tight font-light mb-6 uppercase tracking-wider">
+              <h1 className="font-ivy text-[42px] sm:text-[48px] lg:text-[54px] xl:text-[58px] text-[#121212] leading-[1.05] font-light mb-6 md:mb-8 uppercase tracking-wide">
                 {title}
               </h1>
 
-              <div className="space-y-3.5 text-xs md:text-[13px] leading-relaxed text-[#121212]/80 font-assistant font-light tracking-wide mb-8">
-                <p className="text-black font-normal">
+              <div className="space-y-4 text-[15px] md:text-[15px] lg:text-base leading-relaxed text-[#121212]/80 font-assistant font-light tracking-wide mb-8 md:mb-10 max-w-xl lg:max-w-none">
+                <p className="text-black font-normal text-[16px] md:text-base">
                   {origin} &middot; <span className="italic">{species}</span>
                 </p>
                 {pearl_size && <p>Pearl size {pearl_size}</p>}
@@ -190,7 +180,7 @@ export default function ProductDetail() {
               </div>
 
               {product_variants.length > 0 && (
-                <div className="relative border-b border-black/10 pb-2 w-48 mb-7">
+                <div className="relative border-b border-black/10 pb-2.5 w-full max-w-xs mb-8">
                   <select
                     value={selectedVariant ? selectedVariant.id : ""}
                     onChange={(e) => {
@@ -199,7 +189,7 @@ export default function ProductDetail() {
                       );
                       setSelectedVariant(variant);
                     }}
-                    className="w-full bg-transparent font-assistant text-sm font-light text-[#121212] pr-6 outline-none appearance-none cursor-pointer"
+                    className="w-full bg-transparent font-assistant text-[15px] md:text-base font-light text-[#121212] pr-6 outline-none appearance-none cursor-pointer"
                   >
                     {product_variants.map((v) => (
                       <option key={v.id} value={v.id}>
@@ -215,22 +205,22 @@ export default function ProductDetail() {
                 </div>
               )}
 
-              <span className="font-sans text-[16px] font-bold text-[#121212] mb-6">
+              <span className="font-sans text-xl md:text-2xl font-bold text-[#121212] mb-8">
                 {priceFormatted}
               </span>
 
               <a
                 href={`tel:${ORDER_PHONE}`}
-                className="w-full max-w-md bg-gh-gold text-white font-assistant text-[11px] font-semibold uppercase tracking-[3px] py-4 text-center hover:bg-aquaelm-blue-light transition-colors duration-300 flex items-center justify-center gap-1.5 cursor-pointer mb-7"
+                className="w-full max-w-lg bg-gh-gold text-white font-assistant text-[12px] md:text-[13px] font-semibold uppercase tracking-[3px] py-4 md:py-[1.125rem] text-center hover:bg-aquaelm-blue-light transition-colors duration-300 flex items-center justify-center gap-1.5 cursor-pointer mb-8"
               >
-                CALL TO ORDER &gt;
+                CALL TO ORDER
               </a>
 
-              <div className="w-full max-w-md border-b border-black/10 pb-4">
+              <div className="w-full max-w-lg border-b border-black/10 pb-4">
                 <button
                   type="button"
                   onClick={() => setIsDeliveryOpen(!isDeliveryOpen)}
-                  className="w-full flex items-center justify-between font-assistant text-[11px] font-semibold uppercase tracking-[1.5px] text-[#121212] py-2 hover:opacity-75 transition-opacity"
+                  className="w-full flex items-center justify-between font-assistant text-[12px] md:text-[13px] font-semibold uppercase tracking-[1.5px] text-[#121212] py-2.5 hover:opacity-75 transition-opacity"
                 >
                   <span>Delivery & Returns</span>
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={`w-3.5 h-3.5 transition-transform duration-200 ${isDeliveryOpen ? "rotate-180" : ""}`}>
@@ -238,7 +228,7 @@ export default function ProductDetail() {
                   </svg>
                 </button>
                 {isDeliveryOpen && (
-                  <div className="mt-3 font-assistant text-[12px] text-[#121212]/70 leading-relaxed font-light space-y-2">
+                  <div className="mt-3 font-assistant text-[13px] md:text-[14px] text-[#121212]/70 leading-relaxed font-light space-y-2">
                     <p>
                       We take great care in delivering our caviar at peak
                       freshness. All orders are shipped via overnight delivery
@@ -258,11 +248,11 @@ export default function ProductDetail() {
             </div>
           </div>
 
-          <div className="mt-16 md:mt-20 pt-10 md:pt-12 border-t border-black/10 w-full">
-            <h2 className="font-assistant text-[11px] font-semibold uppercase tracking-[2px] text-gh-gold mb-2">
+          <div className="mt-14 md:mt-16 pt-10 md:pt-12 border-t border-black/10 w-full">
+            <h2 className="font-assistant text-[12px] md:text-[13px] font-semibold uppercase tracking-[2px] text-gh-gold mb-2">
               Email Inquiry
             </h2>
-            <p className="font-assistant text-[13px] text-[#121212]/70 font-light leading-relaxed mb-8 max-w-2xl">
+            <p className="font-assistant text-[14px] md:text-[15px] text-[#121212]/70 font-light leading-relaxed mb-8 max-w-2xl">
               Send us a message about this product and our team will respond with availability and details.
             </p>
 
@@ -347,9 +337,6 @@ export default function ProductDetail() {
             </form>
           </div>
         </div>
-      </main>
-
-      <Footer />
-    </div>
+    </PageShell>
   );
 }

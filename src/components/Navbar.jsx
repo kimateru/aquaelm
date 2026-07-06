@@ -1,16 +1,17 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { HiMagnifyingGlass } from "react-icons/hi2";
-import { PiDotsNineBold, PiXBold } from "react-icons/pi";
+import { HiMagnifyingGlass, HiBars3, HiXMark } from "react-icons/hi2";
+import { PiXBold } from "react-icons/pi";
 import { IoChevronDown } from "react-icons/io5";
 import fishGraphic from "../assets/Fish_Graphic.webp";
 import { fetchProducts } from "../services/products";
+import { useScrollLock } from "../context/LenisContext";
 
 const LOGO_URL = "/logo_main.png";
 
 const COUNTRIES = [
-  { id: "uk", label: "United Kingdom" },
-  { id: "md", label: "Moldova" },
+  { id: "uk", label: "United Kingdom", shortLabel: "UK" },
+  { id: "md", label: "Moldova", shortLabel: "MD" },
 ];
 
 const QUICK_SEARCHES = ["Beluga", "Osetra", "Sturgeon", "Foie Gras", "Truffles", "Gift Box"];
@@ -44,14 +45,7 @@ export default function Navbar() {
     }
   }, [searchOpen]);
 
-  useEffect(() => {
-    if (menuOpen || searchOpen) {
-      document.body.classList.add("overflow-hidden");
-    } else {
-      document.body.classList.remove("overflow-hidden");
-    }
-    return () => document.body.classList.remove("overflow-hidden");
-  }, [menuOpen, searchOpen]);
+  useScrollLock(menuOpen || searchOpen);
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -101,60 +95,53 @@ export default function Navbar() {
 
   return (
     <div className="sticky top-0 z-50 select-none transition-all duration-300 brand-surface bg-aquaelm-blue border-b border-white/15">
-      <header className="site-gutter grid h-[75px] grid-cols-[1fr_auto_1fr] items-center relative z-50 brand-surface bg-aquaelm-blue">
-        <div className="flex items-center">
+      <header className="relative z-50 flex h-[7.75rem] w-full items-center justify-between bg-aquaelm-blue px-10 max-md:h-[4.75rem] max-md:px-4">
+        <div className="relative z-30 flex min-w-0 flex-1 basis-0 items-center justify-start">
           <button
             type="button"
             onClick={handleOpenMenu}
-            className="flex items-center gap-3 outline-none rounded-sm py-1.5"
+            className="-ml-1 flex min-h-11 shrink-0 items-center gap-2.5 py-1 text-white outline-none transition-colors hover:text-aquaelm-accent max-md:gap-2"
             aria-label={menuOpen ? "Close navigation" : "Open navigation"}
+            aria-expanded={menuOpen}
           >
-            <span
-              className={`flex h-9 w-9 items-center justify-center rounded-full border transition-all duration-300 ${
-                menuOpen
-                  ? "border-aquaelm-accent bg-white/10 rotate-90"
-                  : "border-white/35 bg-white/5"
-              }`}
-            >
-              {menuOpen ? (
-                <PiXBold className="h-4 w-4 text-aquaelm-accent" />
-              ) : (
-                <PiDotsNineBold className="h-4 w-4 text-white" />
-              )}
-            </span>
-            <span className="font-assistant text-[11px] font-semibold uppercase tracking-[2.5px] text-white hidden sm:inline">
-              {menuOpen ? "Close" : "Navigate"}
+            {menuOpen ? (
+              <HiXMark className="h-6 w-6 shrink-0 max-md:h-[22px] max-md:w-[22px]" />
+            ) : (
+              <HiBars3 className="h-6 w-6 shrink-0 max-md:h-[22px] max-md:w-[22px]" />
+            )}
+            <span className="font-assistant text-sm font-semibold uppercase leading-none tracking-[0.2em] text-white max-md:text-[12px] max-md:tracking-[0.18em]">
+              {menuOpen ? "Close" : "Menu"}
             </span>
           </button>
         </div>
 
-        <div className="flex justify-center">
-          <Link
-            to="/"
-            onClick={() => setMenuOpen(false)}
-            className="block outline-none focus-visible:outline-none"
-          >
-            <img
-              src={LOGO_URL}
-              alt="Aquaelm"
-              width={65}
-              height={65}
-              className="h-[65px] w-[65px] object-contain"
-            />
-          </Link>
-        </div>
+        <Link
+          to="/"
+          onClick={() => setMenuOpen(false)}
+          className="absolute left-1/2 top-1/2 z-20 block -translate-x-1/2 -translate-y-1/2 outline-none focus-visible:outline-none"
+        >
+          <img
+            src={LOGO_URL}
+            alt="Aquaelm"
+            className="h-[7.5rem] w-[7.5rem] object-contain max-md:h-14 max-md:w-14"
+          />
+        </Link>
 
-        <div className="flex items-center justify-end gap-2 text-white">
-          <div className="relative flex items-center" ref={countryRef}>
+        <div className="relative z-30 flex min-w-0 flex-1 basis-0 items-center justify-end gap-1 text-white max-md:gap-0">
+          <div className="relative flex shrink-0 items-center" ref={countryRef}>
             <button
               type="button"
-              className="nav-action-btn flex items-center gap-1.5 font-assistant text-[13px] font-medium tracking-wide max-w-[140px] sm:max-w-none"
+              className="flex min-h-11 shrink-0 items-center gap-1.5 px-1 py-2 font-assistant text-[15px] font-medium leading-none text-white outline-none max-md:gap-1 max-md:px-0.5 max-md:py-0 max-md:text-[13px]"
               onClick={() => setCountryOpen(!countryOpen)}
               aria-expanded={countryOpen}
+              aria-label={`Region: ${selectedCountry.label}`}
             >
-              <span className="truncate">{selectedCountry.label}</span>
+              <span className="md:hidden">{selectedCountry.shortLabel}</span>
+              <span className="hidden max-w-[140px] truncate md:inline md:max-w-none">
+                {selectedCountry.label}
+              </span>
               <IoChevronDown
-                className={`h-3 w-3 shrink-0 text-aquaelm-accent transition-transform duration-200 ${
+                className={`h-4 w-4 shrink-0 text-aquaelm-accent transition-transform duration-500 ease-[cubic-bezier(0.76,0,0.24,1)] max-md:h-3.5 max-md:w-3.5 ${
                   countryOpen ? "rotate-180" : ""
                 }`}
               />
@@ -162,14 +149,14 @@ export default function Navbar() {
 
             {countryOpen && (
               <ul
-                className="absolute right-0 top-full z-50 mt-2 min-w-[180px] overflow-hidden border border-aquaelm-accent/40 bg-aquaelm-blue py-1 shadow-xl"
+                className="absolute right-0 top-full z-50 mt-2 min-w-[200px] overflow-hidden border border-aquaelm-accent/40 bg-aquaelm-blue py-1 shadow-xl"
                 role="listbox"
               >
                 {COUNTRIES.map((country) => (
                   <li key={country.id}>
                     <button
                       type="button"
-                      className={`flex w-full items-center px-4 py-2.5 text-left font-assistant text-[13px] transition-colors ${
+                      className={`flex w-full items-center px-4 py-3 text-left font-assistant text-[15px] transition-colors md:py-2.5 md:text-[13px] ${
                         selectedCountry.id === country.id
                           ? "text-aquaelm-accent bg-white/10"
                           : "text-white/85 hover:bg-white/10 hover:text-white"
@@ -190,10 +177,10 @@ export default function Navbar() {
           <button
             type="button"
             onClick={handleOpenSearch}
-            className="nav-action-btn flex items-center justify-center outline-none"
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-sm text-white outline-none transition-all hover:bg-white/15 hover:text-aquaelm-accent md:h-auto md:w-auto md:px-2.5 md:py-1.5"
             aria-label="Search products"
           >
-            <HiMagnifyingGlass className="h-[18px] w-[18px]" />
+            <HiMagnifyingGlass className="h-6 w-6 max-md:h-[22px] max-md:w-[22px]" />
           </button>
         </div>
       </header>
@@ -206,7 +193,7 @@ export default function Navbar() {
       />
 
       <div
-        className={`fixed inset-x-0 top-[75px] z-50 px-4 md:px-8 transition-all duration-300 ease-out ${
+        className={`fixed inset-x-0 top-[7.75rem] z-50 px-8 transition-all duration-300 ease-out max-md:top-[4.75rem] max-md:px-4 ${
           searchOpen
             ? "opacity-100 translate-y-0 pointer-events-auto"
             : "opacity-0 -translate-y-3 pointer-events-none"
@@ -244,7 +231,7 @@ export default function Navbar() {
             />
           </div>
 
-          <div className="px-6 md:px-8 py-5 max-h-[50vh] overflow-y-auto">
+          <div className="px-6 md:px-8 py-5 max-h-[50vh] overflow-y-auto" data-lenis-prevent>
             {searchQuery.trim().length > 0 ? (
               <>
                 <p className="font-assistant text-[11px] uppercase tracking-[2px] text-white/45 mb-4">
@@ -337,8 +324,8 @@ export default function Navbar() {
           />
         </div>
 
-        <div className="relative z-10 flex flex-col items-center justify-center h-full pt-[75px]">
-          <nav className="flex flex-col items-center gap-7 md:gap-9">
+        <div className="relative z-10 flex h-full flex-col items-center justify-center pt-[7.75rem] max-md:pt-[4.75rem]">
+          <nav className="flex flex-col items-center gap-8 md:gap-9">
             {[
               { to: "/", label: "Home", delay: "delay-100" },
               { to: "/pages/about-us", label: "Our Story", delay: "delay-150" },
@@ -349,7 +336,7 @@ export default function Navbar() {
                 key={to}
                 to={to}
                 onClick={() => setMenuOpen(false)}
-                className={`relative pb-1 font-ivy text-[38px] sm:text-[44px] md:text-[50px] font-light text-white transition-all duration-500 ease-out ${delay} ${
+                className={`relative pb-1 font-ivy text-[44px] sm:text-[44px] md:text-[50px] font-light text-white transition-all duration-500 ease-out ${delay} ${
                   menuOpen ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
                 }`}
               >

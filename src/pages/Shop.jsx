@@ -1,31 +1,23 @@
 import { useState, useEffect, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import Hls from "hls.js";
-import Navbar from "../components/Navbar";
+import PageShell from "../components/PageShell";
+import PageHeroVideo from "../components/PageHeroVideo";
 import ProductCard from "../components/ProductCard";
-import Footer from "../components/Footer";
 import { fetchProducts } from "../services/products";
+import { useScrollLock } from "../context/LenisContext";
 
-const HLS_VIDEO_URL =
-  "https://gourmethouse.com/cdn/shop/videos/c/vp/f4c32831fcc545069ff7bcaa44e2b2b4/f4c32831fcc545069ff7bcaa44e2b2b4.m3u8?v=0";
-
-const FILTER_STRUCTURE = {
-  "From the sea": ["Beluga", "Kaluga", "Sturgeon", "Sevruga", "Baerii", "Almas"],
-  "From the land": ["Foie Gras", "Saffron", "Truffles"],
-  "Gifts and Others": ["Mother of Pearl", "Gift Boxes", "Accompaniments", "Skincare"]
-};
+const CAVIAR_FILTERS = ["Beluga", "Kaluga", "Sturgeon", "Sevruga", "Baerii", "Almas"];
 
 const CATEGORY_DISPLAY_NAMES = {
-  "From the sea": "From The Sea",
-  "From the land": "From The Land",
-  "Gifts and Others": "Gifts and Accessories"
+  "From the sea": "Caviar",
+  "From the land": "From the Land",
+  "Gifts and Others": "Gifts & Others",
 };
 
 export default function Shop() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const videoRef = useRef(null);
   const sortRef = useRef(null);
 
   const location = useLocation();
@@ -38,52 +30,13 @@ export default function Shop() {
   const [isSortOpen, setIsSortOpen] = useState(false);
   const [sortBy, setSortBy] = useState("Featured");
   
-  const [activeFilters, setActiveFilters] = useState({
-    "From the sea": [],
-    "From the land": [],
-    "Gifts and Others": []
-  });
-  
-  const [stagedFilters, setStagedFilters] = useState({
-    "From the sea": [],
-    "From the land": [],
-    "Gifts and Others": []
-  });
-
-  const [expandedAccordions, setExpandedAccordions] = useState({
-    "From the sea": false,
-    "From the land": false,
-    "Gifts and Others": false
-  });
-
+  const [activeFilters, setActiveFilters] = useState([]);
+  const [stagedFilters, setStagedFilters] = useState([]);
 
   useEffect(() => {
-    if (location.state && location.state.category) {
-      const cat = location.state.category;
-      
-      const newFilters = {
-        "From the sea": [],
-        "From the land": [],
-        "Gifts and Others": []
-      };
-      
-      if (cat === "From the sea") {
-        newFilters["From the sea"] = FILTER_STRUCTURE["From the sea"];
-      } else if (cat === "From the land") {
-        newFilters["From the land"] = FILTER_STRUCTURE["From the land"];
-      } else if (cat === "Gifts and Others") {
-        newFilters["Gifts and Others"] = FILTER_STRUCTURE["Gifts and Others"];
-      }
-      
-      setActiveFilters(newFilters);
-      setStagedFilters(newFilters);
-      setExpandedAccordions({
-        "From the sea": cat === "From the sea",
-        "From the land": cat === "From the land",
-        "Gifts and Others": cat === "Gifts and Others"
-      });
-      
-
+    if (location.state?.category === "From the sea") {
+      setActiveFilters([...CAVIAR_FILTERS]);
+      setStagedFilters([...CAVIAR_FILTERS]);
       window.history.replaceState({}, document.title);
     }
   }, [location.state]);
@@ -107,37 +60,7 @@ export default function Shop() {
     loadProducts();
   }, []);
 
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
-
-    if (Hls.isSupported()) {
-      const hls = new Hls();
-      hls.loadSource(HLS_VIDEO_URL);
-      hls.attachMedia(video);
-      hls.on(Hls.Events.MANIFEST_PARSED, () => {
-        video.play().catch((e) => console.log("Autoplay blocked:", e));
-      });
-    } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
-      video.src = HLS_VIDEO_URL;
-      video.addEventListener("loadedmetadata", () => {
-        video.play().catch((e) => console.log("Autoplay blocked:", e));
-      });
-    }
-  }, []);
-
-
-  useEffect(() => {
-    if (isFilterOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [isFilterOpen]);
-
+  useScrollLock(isFilterOpen);
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -151,51 +74,27 @@ export default function Shop() {
 
   const formatCategoryTitle = (catName) => {
     if (!catName) return "Caviar";
-    if (catName.toLowerCase() === "gifts and others") return "Gifts and Accessories";
-    const lowerWords = ["the", "from", "of", "in", "a", "to", "by"];
-    return catName
-      .split(" ")
-      .map((word, index) => {
-        const wordLower = word.toLowerCase();
-        if (index > 0 && lowerWords.includes(wordLower)) {
-          return wordLower;
-        }
-        return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
-      })
-      .join(" ");
+    return CATEGORY_DISPLAY_NAMES[catName] || catName;
   };
 
-  const getProductSubcategory = (product) => {
-    const title = (product.title || "").toLowerCase();
+  const getCaviarFilterValue = (product) => {
     const cat = (product.category || "").toLowerCase();
-    
-    if (cat === "from the sea") {
-      if (title.includes("beluga")) return "Beluga";
-      if (title.includes("kaluga")) return "Kaluga";
-      if (title.includes("sturgeon")) return "Sturgeon";
-      if (title.includes("sevruga")) return "Sevruga";
-      if (title.includes("baerii")) return "Baerii";
-      if (title.includes("almas")) return "Almas";
-    }
-    if (cat === "from the land") {
-      if (title.includes("foie gras")) return "Foie Gras";
-      if (title.includes("saffron")) return "Saffron";
-      if (title.includes("truffle")) return "Truffles";
-    }
-    if (cat === "gifts and others" || cat === "gifts and accessories") {
-      if (title.includes("mother of pearl")) return "Mother of Pearl";
-      if (title.includes("gift") || title.includes("box")) return "Gift Boxes";
-      if (title.includes("blini") || title.includes("fraiche")) return "Accompaniments";
-      if (title.includes("caviar x") || title.includes("skincare")) return "Skincare";
-    }
+    if (cat !== "from the sea") return null;
+
+    const title = (product.title || "").toLowerCase();
+    if (title.includes("beluga")) return "Beluga";
+    if (title.includes("kaluga")) return "Kaluga";
+    if (title.includes("sturgeon")) return "Sturgeon";
+    if (title.includes("sevruga")) return "Sevruga";
+    if (title.includes("baerii")) return "Baerii";
+    if (title.includes("almas")) return "Almas";
     return null;
   };
 
-
-  const subcatCounts = products.reduce((acc, product) => {
-    const subcat = getProductSubcategory(product);
-    if (subcat) {
-      acc[subcat] = (acc[subcat] || 0) + 1;
+  const filterCounts = products.reduce((acc, product) => {
+    const value = getCaviarFilterValue(product);
+    if (value) {
+      acc[value] = (acc[value] || 0) + 1;
     }
     return acc;
   }, {});
@@ -205,35 +104,6 @@ export default function Shop() {
     if (!product.product_variants || product.product_variants.length === 0) return 0;
     const prices = product.product_variants.map(v => v.price);
     return Math.min(...prices);
-  };
-
-
-  const getRarityScore = (product) => {
-    const title = (product.title || "").toLowerCase();
-    
-    if (title.includes("almas")) return 10;
-    if (title.includes("beluga xx")) return 9.5;
-    if (title.includes("beluga")) return 9;
-    if (title.includes("sevruga")) return 8.5;
-    if (title.includes("kaluga hybrid a")) return 7.5;
-    if (title.includes("kaluga hybrid")) return 7;
-    if (title.includes("kaluga")) return 6.5;
-    if (title.includes("white sturgeon")) return 6;
-    if (title.includes("baerii")) return 5;
-    
-    if (title.includes("3% truffle")) return 9;
-    if (title.includes("goose foie gras")) return 8;
-    if (title.includes("duck foie gras")) return 7;
-    if (title.includes("black truffles")) return 8.5;
-    if (title.includes("saffron")) return 8;
-    
-    if (title.includes("gift box")) return 9;
-    if (title.includes("mother of pearl")) return 8;
-    if (title.includes("blinis")) return 7;
-    if (title.includes("fraiche")) return 7;
-    if (title.includes("caviar x")) return 7;
-    
-    return 1;
   };
 
 
@@ -253,18 +123,10 @@ export default function Shop() {
     }
 
 
-    const hasActiveFilters = 
-      activeFilters["From the sea"].length > 0 ||
-      activeFilters["From the land"].length > 0 ||
-      activeFilters["Gifts and Others"].length > 0;
-      
-    if (!hasActiveFilters) return true;
-    
-    const productCat = product.category || "From the sea";
-    const selectedSubcatsForCategory = activeFilters[productCat] || [];
-    
-    const subcat = getProductSubcategory(product);
-    return selectedSubcatsForCategory.includes(subcat);
+    if (activeFilters.length === 0) return true;
+
+    const caviarType = getCaviarFilterValue(product);
+    return caviarType && activeFilters.includes(caviarType);
   });
 
 
@@ -273,13 +135,7 @@ export default function Shop() {
     sortedProducts.sort((a, b) => getMinPrice(a) - getMinPrice(b));
   } else if (sortBy === "Price Descending") {
     sortedProducts.sort((a, b) => getMinPrice(b) - getMinPrice(a));
-  } else if (sortBy === "Rarest First") {
-    sortedProducts.sort((a, b) => {
-      const rarityDiff = getRarityScore(b) - getRarityScore(a);
-      if (rarityDiff !== 0) return rarityDiff;
-      return getMinPrice(b) - getMinPrice(a);
-    });
-  } 
+  }
 
 
   const groupedProducts = sortedProducts.reduce((acc, product) => {
@@ -316,35 +172,21 @@ export default function Shop() {
   );
 
   return (
-    <div className="min-h-screen bg-white flex flex-col font-sans select-none">
-      <Navbar />
+    <>
+      <PageShell mainClassName="pb-24">
+        <PageHeroVideo
+          title="Our Shop"
+          titleClassName="font-ivy text-[48px] sm:text-[68px] md:text-[84px] font-light text-white uppercase tracking-[4px] text-center"
+        />
 
-      <main className="flex-grow flex flex-col pb-24">
-        <div className="relative w-full section-viewport overflow-hidden bg-[#121212]">
-          <video
-            ref={videoRef}
-            className="absolute top-0 left-0 w-full h-full object-cover opacity-90"
-            muted
-            loop
-            playsInline
-            autoPlay
-          />
-          <div className="absolute inset-0 bg-black/10 z-10"></div>
-          <div className="absolute inset-0 flex items-center justify-center z-20 select-none pointer-events-none">
-            <h1 className="font-ivy text-[48px] sm:text-[68px] md:text-[84px] font-light text-white uppercase tracking-[4px] text-center">
-              Our Shop
-            </h1>
-          </div>
-        </div>
-
-        <div className="border-y border-black/10 bg-white py-5 px-6 md:px-12 flex items-center justify-between mb-12 max-w-full z-10">
+        <div className="border-y border-black/10 bg-white py-4 md:py-5 site-gutter-x md:px-12 flex items-center justify-between mb-8 md:mb-12 max-w-full z-10">
           <button
             type="button"
             onClick={() => {
-              setStagedFilters({ ...activeFilters });
+              setStagedFilters([...activeFilters]);
               setIsFilterOpen(true);
             }}
-            className="flex items-center gap-2.5 font-sans text-[11px] font-semibold uppercase tracking-[2px] text-[#121212] transition-opacity hover:opacity-80"
+            className="flex items-center gap-2.5 font-sans text-[13px] md:text-[11px] font-semibold uppercase tracking-[2px] text-[#121212] transition-opacity hover:opacity-80"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -367,7 +209,7 @@ export default function Shop() {
             <button
               type="button"
               onClick={() => setIsSortOpen(!isSortOpen)}
-              className="flex items-center gap-2 font-sans text-[11px] font-semibold uppercase tracking-[2px] text-[#121212] transition-opacity hover:opacity-80"
+              className="flex items-center gap-2 font-sans text-[13px] md:text-[11px] font-semibold uppercase tracking-[2px] text-[#121212] transition-opacity hover:opacity-80"
             >
               Sort By {sortBy !== "Featured" && `(${sortBy})`}
               <svg
@@ -388,7 +230,7 @@ export default function Shop() {
             
             {isSortOpen && (
               <div className="absolute right-0 mt-3 w-56 bg-white border border-black/15 shadow-[0_10px_30px_rgba(0,0,0,0.08)] z-30 py-5 px-6 flex flex-col gap-3.5">
-                {["Featured", "Rarest First", "Price Ascending", "Price Descending"].map((option) => (
+                {["Featured", "Price Ascending", "Price Descending"].map((option) => (
                   <button
                     key={option}
                     type="button"
@@ -433,7 +275,7 @@ export default function Shop() {
         {loading ? (
           <SkeletonGrid />
         ) : error ? (
-          <div className="flex flex-col items-center justify-center section-viewport py-20 px-6 text-center max-w-md mx-auto">
+          <div className="flex flex-col items-center justify-center py-16 md:py-20 site-gutter-x text-center max-w-md mx-auto">
             <p className="text-red-500 font-semibold mb-2">Error Loading Products</p>
             <p className="text-xs text-gh-dark/60 mb-6">{error}</p>
             <button
@@ -444,7 +286,7 @@ export default function Shop() {
             </button>
           </div>
         ) : categories.length === 0 ? (
-          <div className="flex flex-col items-center justify-center section-viewport py-20 px-6 text-center max-w-md mx-auto">
+          <div className="flex flex-col items-center justify-center py-16 md:py-20 site-gutter-x text-center max-w-md mx-auto">
             <p className="font-ivy text-lg text-gh-dark mb-4">
               {searchQuery ? "No Results Found" : "No Caviar Available"}
             </p>
@@ -463,15 +305,15 @@ export default function Shop() {
             )}
           </div>
         ) : (
-          <div className="w-full flex flex-col gap-16">
+          <div className="w-full flex flex-col gap-10 md:gap-16">
             {categories.map((category) => (
-              <div key={category} className="w-full section-viewport flex flex-col justify-center py-16">
-                <h2 className="font-ivy text-[34px] sm:text-[44px] md:text-[50px] text-gh-dark text-center font-light mb-10 md:mb-12 tracking-wide uppercase">
+              <div key={category} className="w-full section-content flex flex-col justify-center py-10 md:py-16">
+                <h2 className="section-heading mb-8 md:mb-12 site-gutter-x">
                   {formatCategoryTitle(category)}
                 </h2>
 
-                <div className="max-w-7xl mx-auto w-full px-6">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-x-12 gap-y-16">
+                <div className="max-w-7xl mx-auto w-full site-gutter-x">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-x-12 gap-y-12 md:gap-y-16">
                     {groupedProducts[category].map((product) => (
                       <ProductCard key={product.id} product={product} />
                     ))}
@@ -481,9 +323,7 @@ export default function Shop() {
             ))}
           </div>
         )}
-      </main>
-      <Footer />
-
+      </PageShell>
 
       {isFilterOpen && (
         <div 
@@ -512,83 +352,45 @@ export default function Shop() {
         </div>
 
 
-        <div className="flex-grow overflow-y-auto px-10 py-6 space-y-6">
-          {Object.entries(FILTER_STRUCTURE).map(([categoryKey, subcategories]) => {
-            const isExpanded = expandedAccordions[categoryKey];
-            const displayName = CATEGORY_DISPLAY_NAMES[categoryKey];
-            
-
-            const toggleAccordion = (key) => {
-              setExpandedAccordions(prev => ({
-                ...prev,
-                [key]: !prev[key]
-              }));
-            };
-
-
-            const toggleFilterCheckbox = (cat, sub) => {
-              setStagedFilters(prev => {
-                const currentList = prev[cat] || [];
-                const newList = currentList.includes(sub)
-                  ? currentList.filter(item => item !== sub)
-                  : [...currentList, sub];
-                return {
-                  ...prev,
-                  [cat]: newList
-                };
-              });
-            };
+        <div className="flex-grow overflow-y-auto px-10 py-6 space-y-4" data-lenis-prevent>
+          {CAVIAR_FILTERS.map((filter) => {
+            const isChecked = stagedFilters.includes(filter);
+            const count = filterCounts[filter] || 0;
 
             return (
-              <div key={categoryKey} className="border-b border-black/5 pb-4">
-                <button
-                  type="button"
-                  onClick={() => toggleAccordion(categoryKey)}
-                  className="w-full flex justify-between items-center text-left py-2 font-assistant text-[15px] font-medium tracking-[1.5px] uppercase text-[#121212]/85 hover:text-black transition-colors"
+              <label
+                key={filter}
+                className="flex items-center gap-3.5 cursor-pointer group text-[#121212]/75 hover:text-black font-assistant text-[14px] select-none"
+              >
+                <input
+                  type="checkbox"
+                  className="sr-only"
+                  checked={isChecked}
+                  onChange={() => {
+                    setStagedFilters((prev) =>
+                      prev.includes(filter)
+                        ? prev.filter((item) => item !== filter)
+                        : [...prev, filter],
+                    );
+                  }}
+                />
+                <span
+                  className={`w-[18px] h-[18px] border flex items-center justify-center transition-all ${
+                    isChecked
+                      ? "bg-gh-gold border-gh-gold"
+                      : "bg-white border-black/20 group-hover:border-black/50"
+                  }`}
                 >
-                  <span>{displayName}</span>
-                  <span className="text-[20px] font-light leading-none select-none">
-                    {isExpanded ? "−" : "+"}
-                  </span>
-                </button>
-                
-                {isExpanded && (
-                  <div className="mt-4 pl-1 space-y-4">
-                    {subcategories.map((subcat) => {
-                      const isChecked = stagedFilters[categoryKey]?.includes(subcat);
-                      const count = subcatCounts[subcat] || 0;
-                      
-                      return (
-                        <label 
-                          key={subcat} 
-                          className="flex items-center gap-3.5 cursor-pointer group text-[#121212]/75 hover:text-black font-assistant text-[14px] select-none"
-                        >
-                          <input
-                            type="checkbox"
-                            className="sr-only"
-                            checked={isChecked}
-                            onChange={() => toggleFilterCheckbox(categoryKey, subcat)}
-                          />
-                          <span className={`w-[18px] h-[18px] border flex items-center justify-center transition-all ${
-                            isChecked 
-                              ? 'bg-gh-gold border-gh-gold' 
-                              : 'bg-white border-black/20 group-hover:border-black/50'
-                          }`}>
-                            {isChecked && (
-                              <svg className="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-                              </svg>
-                            )}
-                          </span>
-                          <span className="tracking-[0.5px]">
-                            {subcat} ({count})
-                          </span>
-                        </label>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
+                  {isChecked && (
+                    <svg className="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                    </svg>
+                  )}
+                </span>
+                <span className="tracking-[0.5px]">
+                  {filter} ({count})
+                </span>
+              </label>
             );
           })}
         </div>
@@ -597,13 +399,7 @@ export default function Shop() {
         <div className="p-10 border-t border-black/5 flex items-center justify-between bg-white">
           <button
             type="button"
-            onClick={() => {
-              setStagedFilters({
-                "From the sea": [],
-                "From the land": [],
-                "Gifts and Others": []
-              });
-            }}
+            onClick={() => setStagedFilters([])}
             className="font-sans text-[11px] font-semibold uppercase tracking-[2px] border-b border-[#121212] text-[#121212] pb-0.5 hover:opacity-75 transition-opacity flex items-center gap-1.5"
           >
             Clear All
@@ -615,7 +411,7 @@ export default function Shop() {
           <button
             type="button"
             onClick={() => {
-              setActiveFilters({ ...stagedFilters });
+              setActiveFilters([...stagedFilters]);
               setIsFilterOpen(false);
             }}
             className="bg-gh-gold text-white text-[11px] font-semibold uppercase tracking-[2px] px-8 py-3.5 hover:bg-aquaelm-blue-light transition-colors duration-300 flex items-center gap-2"
@@ -627,6 +423,6 @@ export default function Shop() {
           </button>
         </div>
       </div>
-    </div>
+    </>
   );
 }

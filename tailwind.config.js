@@ -11,13 +11,14 @@ export default {
         'gh-gold': '#002D72',
         'gh-brown': '#002D72',
         'gh-dark': '#121212',
+        'gh-gray': '#f4f4f4',
         'gh-sand': '#f9f6f0',
       },
       fontFamily: {
-        sans: ['"El Messiri"', 'serif'],
+        sans: ['ITCSerifGothic', 'sans-serif'],
         ivy: ['"El Messiri"', 'serif'],
-        assistant: ['"El Messiri"', 'serif'],
-        helvetica: ['"El Messiri"', 'serif'],
+        assistant: ['ITCSerifGothic', 'sans-serif'],
+        helvetica: ['ITCSerifGothic', 'sans-serif'],
       },
       keyframes: {
         'scroll-down': {

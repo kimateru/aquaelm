@@ -1,0 +1,73 @@
+{
+  "description": "All photos and videos used on the Aquaelm site, extracted from code references and local assets.",
+  "extractedAt": "2026-07-06",
+  "images": [
+    {
+      "file": "images/fish-graphic.webp",
+      "source": "local: src/assets/Fish_Graphic.webp",
+      "usedIn": ["Home.jsx", "OurStory.jsx", "Navbar.jsx"]
+    },
+    {
+      "file": "images/home-shop-hero.png",
+      "source": "https://gourmethouse.com/cdn/shop/files/home_shop_hero.png",
+      "usedIn": ["Home.jsx — Caviar hero section"]
+    },
+    {
+      "file": "images/la-perle-full-width.jpg",
+      "source": "https://gourmethouse.com/cdn/shop/files/la-perle-full-width.jpg",
+      "usedIn": ["Home.jsx — La Perle section"]
+    },
+    {
+      "file": "images/pills-full-width.jpg",
+      "source": "https://gourmethouse.com/cdn/shop/files/pills-full-width.jpg",
+      "usedIn": ["Home.jsx — Caviar X section"]
+    },
+    {
+      "file": "images/quality-full-width.jpg",
+      "source": "https://gourmethouse.com/cdn/shop/files/quality-full-width.jpg",
+      "usedIn": ["OurStory.jsx — Quality section"]
+    },
+    {
+      "file": "images/lab-full-width.jpg",
+      "source": "https://gourmethouse.com/cdn/shop/files/lab-full-width.jpg",
+      "usedIn": ["OurStory.jsx — Lab section"]
+    },
+    {
+      "file": "images/about-sustainability.png",
+      "source": "https://gourmethouse.com/cdn/shop/files/about_sustainability.png",
+      "usedIn": ["OurStory.jsx — Sustainability section"]
+    },
+    {
+      "file": "images/fallback-unsplash-caviar.jpg",
+      "source": "https://images.unsplash.com/photo-1544025162-d76694265947",
+      "usedIn": ["BestSellersSlider.jsx", "ProductCard.jsx", "ProductDetail.jsx — fallback when no product image"]
+    }
+  ],
+  "logos": [
+    {
+      "file": "logos/logo-main.png",
+      "source": "local: public/logo_main.png",
+      "usedIn": ["Navbar.jsx"]
+    },
+    {
+      "file": "logos/logo-text-footer.png",
+      "source": "local: public/logo_text_footer.png",
+      "usedIn": ["Footer wordmark reference asset"]
+    }
+  ],
+  "videos": [
+    {
+      "file": "videos/hero-home.mp4",
+      "manifest": "videos/hero-home.m3u8",
+      "source": "https://gourmethouse.com/cdn/shop/videos/c/vp/f4c32831fcc545069ff7bcaa44e2b2b4/f4c32831fcc545069ff7bcaa44e2b2b4.m3u8",
+      "usedIn": ["HeroVideo.jsx", "Shop.jsx — shop hero video"]
+    },
+    {
+      "file": "videos/our-story-hero.mp4",
+      "manifest": "videos/our-story-hero.m3u8",
+      "source": "https://gourmethouse.com/cdn/shop/videos/c/vp/6b8a10b734f14c5b95cf333911a2fe8b/6b8a10b734f14c5b95cf333911a2fe8b.m3u8",
+      "usedIn": ["OurStory.jsx — page hero video"]
+    }
+  ],
+  "note": "Product images in src/data/products.ts currently use a Google placeholder URL — real product photos come from Supabase when connected."
+}

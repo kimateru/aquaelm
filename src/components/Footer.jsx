@@ -61,10 +61,6 @@ function FooterWordmark() {
 }
 
 export default function Footer() {
-  const handlePreventDefault = (e) => {
-    e.preventDefault();
-  };
-
   return (
     <footer className="brand-surface bg-aquaelm-blue text-white select-none border-t border-aquaelm-accent/20 pt-14 pb-8 md:pb-10">
       <div className="site-gutter flex flex-col brand-surface bg-aquaelm-blue">
@@ -76,48 +72,6 @@ export default function Footer() {
               <li><Link to="/pages/about-us" className="footer-link">Our Story</Link></li>
               <li><Link to="/collections/all" className="footer-link">Our Shop</Link></li>
               <li><Link to="/pages/contact-us" className="footer-link">Contact Us</Link></li>
-            </ul>
-          </div>
-
-          <div className="flex flex-col gap-4 shrink-0">
-            <h5 className="footer-heading">Shop</h5>
-            <ul className="flex flex-col gap-2.5 font-assistant font-light">
-              <li>
-                <Link to="/collections/all" state={{ category: "From the sea" }} className="footer-link">
-                  From the Sea
-                </Link>
-              </li>
-              <li>
-                <Link to="/collections/all" state={{ category: "From the land" }} className="footer-link">
-                  From the Land
-                </Link>
-              </li>
-              <li>
-                <Link to="/collections/all" state={{ category: "Gifts and Others" }} className="footer-link">
-                  Gifts and Others
-                </Link>
-              </li>
-              <li>
-                <Link to="/collections/all" state={{ category: "Gifts and Others" }} className="footer-link">
-                  Health Products
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          <div className="flex flex-col gap-4 shrink-0">
-            <h5 className="footer-heading">Concierge</h5>
-            <ul className="flex flex-col gap-2.5 font-assistant font-light">
-              <li>
-                <a href="#my-account" onClick={handlePreventDefault} className="footer-link cursor-default">
-                  My Account
-                </a>
-              </li>
-              <li>
-                <a href="#privacy-policy" onClick={handlePreventDefault} className="footer-link cursor-default">
-                  Privacy Policy
-                </a>
-              </li>
             </ul>
           </div>
 
