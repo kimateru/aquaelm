@@ -148,7 +148,7 @@ export default function Home() {
 
           <div className="relative z-10 w-full site-gutter-x py-10 md:absolute md:inset-0 md:mx-auto md:flex md:max-w-7xl md:items-center md:px-12 md:py-0 lg:px-20">
             <div className="flex w-full flex-col items-start gap-4 text-left md:max-w-xl md:gap-5">
-              <h6 className="eyebrow-label">
+              <h6 className="eyebrow-label md:!text-white">
                 LA PERLE
               </h6>
 
@@ -156,22 +156,22 @@ export default function Home() {
                 as="h2"
                 text={LA_PERLE_TEXT}
                 splitLines={false}
-                className="font-ivy text-[34px] sm:text-[38px] md:text-[54px] lg:text-[60px] text-[#121212] leading-[1.15] font-light"
+                className="font-ivy text-[34px] sm:text-[38px] md:text-[54px] lg:text-[60px] text-[#121212] md:text-white leading-[1.15] font-light"
               />
 
               <FogRevealBlock
                 as="p"
                 delay={0.2}
-                className="font-assistant text-[14px] leading-relaxed text-[#121212]/75 font-light"
+                className="font-assistant text-[14px] leading-relaxed text-[#121212]/75 md:text-white/85 font-light"
                 text={LA_PERLE_BODY}
               />
 
               <div className="mt-2 md:mt-5">
                 <Link
                   to="/collections/all"
-                  className="cta-link text-[#121212]"
+                  className="cta-link text-[#121212] md:text-white"
                 >
-                  <span className="inline-flex items-center gap-1.5 pb-1.5 border-b border-[#121212]">
+                  <span className="inline-flex items-center gap-1.5 pb-1.5 border-b border-[#121212] md:border-white">
                     ENJOY APRÈS-ANYTHING
                     <span className="text-[10px]">&gt;</span>
                   </span>
@@ -195,7 +195,7 @@ export default function Home() {
 
           <div className="relative z-10 w-full site-gutter-x py-10 md:absolute md:inset-0 md:mx-auto md:flex md:max-w-7xl md:items-center md:justify-end md:px-12 md:py-0 lg:px-20">
             <div className="flex w-full flex-col items-start gap-4 text-left md:max-w-xl md:gap-5">
-              <h6 className="eyebrow-label">
+              <h6 className="eyebrow-label md:!text-white">
                 CAVIAR X
               </h6>
 
@@ -203,22 +203,22 @@ export default function Home() {
                 as="h2"
                 text={CAVIAR_X_TEXT}
                 splitLines={false}
-                className="font-ivy text-[34px] sm:text-[38px] md:text-[54px] lg:text-[60px] text-[#121212] leading-[1.15] font-light"
+                className="font-ivy text-[34px] sm:text-[38px] md:text-[54px] lg:text-[60px] text-[#121212] md:text-white leading-[1.15] font-light"
               />
 
               <FogRevealBlock
                 as="p"
                 delay={0.2}
-                className="font-assistant text-[14px] leading-relaxed text-[#121212]/75 font-light"
+                className="font-assistant text-[14px] leading-relaxed text-[#121212]/75 md:text-white/85 font-light"
                 text={CAVIAR_X_BODY}
               />
 
               <div className="mt-2 md:mt-5">
                 <Link
                   to="/collections/all"
-                  className="cta-link text-[#121212]"
+                  className="cta-link text-[#121212] md:text-white"
                 >
-                  <span className="inline-flex items-center gap-1.5 pb-1.5 border-b border-[#121212]">
+                  <span className="inline-flex items-center gap-1.5 pb-1.5 border-b border-[#121212] md:border-white">
                     SHOP NOW
                     <span className="text-[10px]">&gt;</span>
                   </span>
